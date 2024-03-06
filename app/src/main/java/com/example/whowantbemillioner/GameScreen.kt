@@ -1,5 +1,6 @@
 package com.example.whowantbemillioner
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,7 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,12 +44,23 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.whowantbemillioner.ui.theme.WhoWantBeMillionerTheme
+import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameScreen() {
+fun GameScreen(onClick: () -> Unit) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val questionViewModel: MainViewModel = viewModel()
+    val viewState by questionViewModel.questionsState
+    var buttonOff by remember { mutableStateOf(true) }
+    var questionCount = remember { mutableIntStateOf(0) }
+    var questionDif = remember { mutableStateOf(0) }
+    if (questionCount.intValue == 5) {
+        questionCount.intValue = 0
+        questionDif.value++
+    }
 
     Scaffold(
         topBar = {
@@ -72,7 +86,7 @@ fun GameScreen() {
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = { onClick() }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Localized description",
@@ -84,7 +98,7 @@ fun GameScreen() {
             )
         },
         containerColor = Color(0xFF374C94)
-        ) { innerPadding ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -107,19 +121,23 @@ fun GameScreen() {
                     contentDescription = null,
                     tint = Color(0xFFFFB340).copy(alpha = 1F)
                 )
-                Text(text = "11",
+                Text(
+                    text = "11",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFFB340).copy(alpha = 1F))
-            }
+                    color = Color(0xFFFFB340).copy(alpha = 1F)
+                )
 
-            Text(text = "What year was the year, when first deodorant was invented in our life?",
+            }
+            Text(
+                text = question(viewState, questionCount.intValue, questionDif.value).toString(),
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(horizontal = 30.dp),
-                textAlign = TextAlign.Center)
+                textAlign = TextAlign.Center
+            )
 
             LazyColumn(
                 modifier = Modifier
@@ -130,8 +148,7 @@ fun GameScreen() {
             ) {
                 items(4) {
                     var answer by remember { mutableStateOf("") }
-
-                    val color = when (answer) {
+                    var color = when (answer) {
                         "true" -> painterResource(id = R.drawable.answer_green)
                         "false" -> painterResource(id = R.drawable.answer_red)
                         else -> painterResource(id = R.drawable.answer_blue)
@@ -141,7 +158,13 @@ fun GameScreen() {
                         modifier = Modifier
                             .fillMaxSize()
                             .size(65.dp)
-                            .clickable { answer = "true" },
+                            .clickable(enabled = buttonOff) {
+                                answer = "true"
+                                buttonOff = false
+                                questionCount.value++
+                                buttonOff = true
+                                answer = "d"
+                            }
                     ) {
                         Image(
                             painter = color,
@@ -157,34 +180,37 @@ fun GameScreen() {
                         ) {
 
                             Text(
-                                text = "${when(it) {
-                                    0 -> "A"
-                                    1 -> "B"
-                                    2 -> "C"
-                                    else -> "D"
-                                }}:  ",
+                                text = "${
+                                    when (it) {
+                                        0 -> "A"
+                                        1 -> "B"
+                                        2 -> "C"
+                                        else -> "D"
+                                    }
+                                }:  ",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFFB340)
                             )
                             Text(
-                                text = "kkjjjjjjhk",
+                                text = questionAnswer(viewState,questionCount.intValue,it,questionDif.value).toString(),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
+
                         }
                     }
                 }
             }
-
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                val buttonList = listOf(R.drawable.fifty_fifty, R.drawable.audience, R.drawable.call)
+                val buttonList =
+                    listOf(R.drawable.fifty_fifty, R.drawable.audience, R.drawable.call)
                 items(buttonList.size) {
                     Image(
                         painter = painterResource(id = buttonList[it]),
@@ -199,10 +225,24 @@ fun GameScreen() {
     }
 }
 
-@Preview(showBackground = true)
+
 @Composable
-fun GameScreenPreview() {
-    WhoWantBeMillionerTheme {
-        GameScreen()
+fun questionAnswer(viewState: QuestionState, question: Int, count: Int, dif: Int): String? {
+    when (dif) {
+        0 -> return viewState.list?.questionEasy?.data?.get(question)?.answers?.get(count)
+        1 -> return viewState.list?.questionMedium?.data?.get(question)?.answers?.get(count)
+        2 -> return viewState.list?.questionHard?.data?.get(question)?.answers?.get(count)
     }
+    return "Я заебался"
 }
+
+@Composable
+fun question(viewState: QuestionState, count: Int, dif: Int): String? {
+    when (dif) {
+        0 -> return viewState.list?.questionEasy?.data?.get(count)?.question
+        1 -> return viewState.list?.questionMedium?.data?.get(count)?.question
+        2 -> return viewState.list?.questionHard?.data?.get(count)?.question
+    }
+    return "Я заебался"
+}
+

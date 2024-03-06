@@ -20,10 +20,9 @@ interface ApiService {
     suspend fun getQuestionHard(): QuestionsResponseHard
 }
 
-suspend fun getQuestionAll (): QuestionsAll {
+suspend fun getQuestionAll(): QuestionsAll {
     val questionsResponseEasy = questionService.getQuestionEasy()
     val questionsResponseMedium = questionService.getQuestionMedium()
     val questionsResponseHard = questionService.getQuestionHard()
-    val questionsResponseAll = QuestionsAll(questionsResponseEasy,questionsResponseMedium,questionsResponseHard)
-    return questionsResponseAll
+    return QuestionsAll(questionsResponseEasy, questionsResponseMedium, questionsResponseHard)
 }
