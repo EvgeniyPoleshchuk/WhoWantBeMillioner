@@ -1,9 +1,7 @@
 package com.example.whowantbemillioner
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,12 +15,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -34,7 +26,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ProgressScreen(onClick: () -> Unit) {
     val image = painterResource(id = R.drawable.millionaire)
-    var timer by remember { mutableIntStateOf(5) }
     val questions = listOf(
         "$500", "$1,000", "$2,000", "$3,000", "$5,000",
         "$7,500", "$10,000", "$12,500", "$15,000", "$25,000",
@@ -58,7 +49,7 @@ fun ProgressScreen(onClick: () -> Unit) {
             verticalArrangement = Arrangement.Top,
             reverseLayout = true
         ) {
-            items(questions.size) {
+            items(cashList().size) {
                 val color =
                     if (it + 1 == 5 || it + 1 == 10) painterResource(id = R.drawable.rectangle_blue)
                     else if (it + 1 == 15) painterResource(id = R.drawable.rectangle_gold)
@@ -119,4 +110,11 @@ fun ProgressScreen(onClick: () -> Unit) {
             Text("Продолжить")
         }
     }
+}
+fun cashList(): List<String> {
+    return listOf(
+        "$500", "$1,000", "$2,000", "$3,000", "$5,000",
+        "$7,500", "$10,000", "$12,500", "$15,000", "$25,000",
+        "$50,000", "$100,000", "$250,000", "$500,000", "$1,000,000"
+    )
 }
