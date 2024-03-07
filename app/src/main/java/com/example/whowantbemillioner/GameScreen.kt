@@ -148,7 +148,9 @@ fun GameScreen(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .padding(horizontal = 30.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 30.dp)
+                    .size(100.dp),
                 textAlign = TextAlign.Center
             )
 
