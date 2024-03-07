@@ -12,12 +12,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val navController = rememberNavController()
+
+            var navController = rememberNavController()
             WhoWantBeMillionerTheme {
                 NavHost(
                     navController = navController,
                     startDestination = "MainScreen"
                 ) {
+
 
                     composable("MainScreen") {
                         MainScreen(navController = navController)
@@ -28,9 +30,10 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("GameScreen") {
-                        GameScreen {
-                            navController.navigate("MainScreen")
-                        }
+                        GameScreen(
+                            onClick = {navController.navigate("MainScreen")},
+                            EndGameScreen = {navController.navigate("EndScreen")}
+                        )
                     }
                     composable("RulesScreen") {
                         RulesScreen {
@@ -40,7 +43,9 @@ class MainActivity : ComponentActivity() {
                     composable("EndScreen") {
                         EndScreen(
                             navigateToMainScreen = { navController.navigate("MainScreen") },
-                            navigateToGameScreen = { navController.navigate("GameScreen") }
+                            navigateToGameScreen = { navController.navigate("GameScreen") },
+
+
                         )
                     }
 

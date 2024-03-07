@@ -44,24 +44,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 
-
+var resulInfo: ResulInfo? = null
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameScreen(onClick: () -> Unit) {
+fun GameScreen(
+    onClick: () -> Unit,
+    EndGameScreen: () -> Unit
+){
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
     var buttonOff by remember { mutableStateOf(true) }
-    val questionCount = remember { mutableIntStateOf( 0) }
+    val questionCount = remember { mutableIntStateOf(0) }
     val questionDif = remember { mutableStateOf(0) }
     var timerRepeat = remember { mutableStateOf(true) }
     var timerCount = remember { mutableStateOf(30) }
-    val count = remember {  mutableIntStateOf(0)}
-    if(timerCount.value == 0 || count.intValue >= 15){
+    val count = remember { mutableIntStateOf(0) }
+    if (timerCount.value == 0 || count.intValue == 14) {
         buttonOff = false
-        count.intValue = 0
+        EndGameScreen()
+        resulInfo = ResulInfo(count.intValue + 1,cashList()[count.intValue])
     }
 
     if (questionCount.intValue == 5) {
@@ -130,7 +135,7 @@ fun GameScreen(onClick: () -> Unit) {
                     tint = Color(0xFFFFB340).copy(alpha = 1F)
                 )
                 Text(
-                    text = countDownTimer(timerCount,timerRepeat).toString(),
+                    text = countDownTimer(timerCount, timerRepeat).toString(),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFFFB340).copy(alpha = 1F)
@@ -161,62 +166,63 @@ fun GameScreen(onClick: () -> Unit) {
                         "false" -> painterResource(id = R.drawable.answer_red)
                         else -> painterResource(id = R.drawable.answer_blue)
                     }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .size(65.dp)
-                                .clickable(enabled = buttonOff) {
-                                    answer = "true"
-                                    buttonOff = false
-                                    timerRepeat.value = false
-                                    timerCount.value = 30
-                                    questionCount.intValue++
-                                    answer = "d"
-                                    buttonOff = true
-                                    count.intValue++
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .size(65.dp)
+                            .clickable(enabled = buttonOff) {
+                                answer = "true"
+                                buttonOff = false
+                                timerRepeat.value = false
+                                timerCount.value = 30
+                                questionCount.intValue++
+                                count.intValue++
+                                answer = "d"
+                                buttonOff = true
 
-                                }
-                        ) {
-                            Image(
-                                painter = color,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.FillBounds
-                            )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 30.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-
-                                Text(
-                                    text = "${
-                                        when (it) {
-                                            0 -> "A"
-                                            1 -> "B"
-                                            2 -> "C"
-                                            else -> "D"
-                                        }
-                                    }:  ",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFFFB340)
-                                )
-                                Text(
-                                    text = questionAnswer(
-                                        viewState,
-                                        questionCount.intValue,
-                                        it,
-                                        questionDif.value
-                                    ).toString(),
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
 
                             }
+                    ) {
+                        Image(
+                            painter = color,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.FillBounds
+                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 30.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Text(
+                                text = "${
+                                    when (it) {
+                                        0 -> "A"
+                                        1 -> "B"
+                                        2 -> "C"
+                                        else -> "D"
+                                    }
+                                }:  ",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFFB340)
+                            )
+                            Text(
+                                text = questionAnswer(
+                                    viewState,
+                                    questionCount.intValue,
+                                    it,
+                                    questionDif.value
+                                ).toString(),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+
                         }
+                    }
 
                 }
             }
@@ -241,16 +247,6 @@ fun GameScreen(onClick: () -> Unit) {
         }
     }
 }
-@Composable
-fun rangeCount(value:Int): Int {
-    val count = remember {  mutableIntStateOf(value)}
-    if(count.intValue == 15){
-        count.intValue = 0
-        count.intValue++
-    }
-    return count.intValue
-}
-
 
 @Composable
 fun questionAnswer(viewState: QuestionState, question: Int, count: Int, dif: Int): String? {
@@ -271,8 +267,9 @@ fun question(viewState: QuestionState, count: Int, dif: Int): String? {
     }
     return "Я заебался"
 }
+
 @Composable
-fun countDownTimer(value:MutableState<Int>,boolean: MutableState<Boolean>): Int {
+fun countDownTimer(value: MutableState<Int>, boolean: MutableState<Boolean>): Int {
     var seconds by remember { mutableStateOf(value) }
     var isRunning by remember { mutableStateOf(boolean) }
     LaunchedEffect(Unit) {
@@ -281,12 +278,13 @@ fun countDownTimer(value:MutableState<Int>,boolean: MutableState<Boolean>): Int 
             seconds.value--
         }
     }
-    if(!isRunning.value) {
+    if (!isRunning.value) {
         seconds = value
         isRunning.value = true
     }
     return seconds.value
 }
+
 
 
 
