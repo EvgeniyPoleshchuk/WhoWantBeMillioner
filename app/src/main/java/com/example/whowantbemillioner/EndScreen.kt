@@ -34,7 +34,7 @@ import androidx.navigation.NavController
 
 
 @Composable
-fun EndScreen(navController: NavController,level: Int = 0, coin:Int = 0) {
+fun EndScreen(navigateToMainScreen:()->Unit ,navigateToGameScreen:()->Unit,level: Int = 0, coin:Int = 0) {
 
     Column(
         modifier = Modifier
@@ -103,7 +103,8 @@ fun EndScreen(navController: NavController,level: Int = 0, coin:Int = 0) {
                         indication = null,
                         interactionSource = MutableInteractionSource()
                     ) {
-                        navController.navigate("GameScreen")
+//                        navController.navigate("GameScreen")
+                        navigateToGameScreen
                     }
             )
             Row(
@@ -139,7 +140,9 @@ fun EndScreen(navController: NavController,level: Int = 0, coin:Int = 0) {
                         indication = null,
                         interactionSource = MutableInteractionSource()
                     ) {
-                        navController.navigate("MainScreen")
+//                        navController.navigate("MainScreen")
+                        navigateToMainScreen
+
                     }
             )
 
@@ -165,5 +168,5 @@ fun EndScreen(navController: NavController,level: Int = 0, coin:Int = 0) {
 @Preview
 @Composable
 fun EndScreenPreview(){
-//    EndScreen( )
+    EndScreen({},{} )
 }
