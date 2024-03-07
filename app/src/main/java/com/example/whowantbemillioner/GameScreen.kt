@@ -1,5 +1,6 @@
 package com.example.whowantbemillioner
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +28,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -41,39 +41,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import kotlinx.coroutines.delay
+import com.example.whowantbemillioner.ui.theme.WhoWantBeMillionerTheme
+import kotlin.math.absoluteValue
 
-var resulInfo: ResulInfo? = null
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GameScreen(
-    onClick: () -> Unit,
-    EndGameScreen: () -> Unit
-){
+fun GameScreen(onClick: () -> Unit) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
     var buttonOff by remember { mutableStateOf(true) }
-    val questionCount = remember { mutableIntStateOf(0) }
-    val questionDif = remember { mutableStateOf(0) }
-    var timerRepeat = remember { mutableStateOf(true) }
-    var timerCount = remember { mutableStateOf(30) }
-    val count = remember { mutableIntStateOf(0) }
-    if (timerCount.value == 0 || count.intValue == 14) {
-        buttonOff = false
-        EndGameScreen()
-        resulInfo = ResulInfo(count.intValue + 1,cashList()[count.intValue])
-    }
-
+    var questionCount = remember { mutableIntStateOf(0) }
+    var questionDif = remember { mutableStateOf(0) }
     if (questionCount.intValue == 5) {
         questionCount.intValue = 0
         questionDif.value++
     }
-
 
     Scaffold(
         topBar = {
@@ -85,13 +72,13 @@ fun GameScreen(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "QUESTION ${count.intValue+1}",
+                            text = "QUESTION #1",
                             color = Color.White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = cashList()[count.intValue],
+                            text = "$500",
                             color = Color.White, // Оставляем цвет остального текста без изменений
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -135,7 +122,7 @@ fun GameScreen(
                     tint = Color(0xFFFFB340).copy(alpha = 1F)
                 )
                 Text(
-                    text = countDownTimer(timerCount, timerRepeat).toString(),
+                    text = "11",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFFFB340).copy(alpha = 1F)
@@ -166,6 +153,7 @@ fun GameScreen(
                         "false" -> painterResource(id = R.drawable.answer_red)
                         else -> painterResource(id = R.drawable.answer_blue)
                     }
+
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -173,14 +161,9 @@ fun GameScreen(
                             .clickable(enabled = buttonOff) {
                                 answer = "true"
                                 buttonOff = false
-                                timerRepeat.value = false
-                                timerCount.value = 30
-                                questionCount.intValue++
-                                count.intValue++
-                                answer = "d"
+                                questionCount.value++
                                 buttonOff = true
-
-
+                                answer = "d"
                             }
                     ) {
                         Image(
@@ -210,12 +193,7 @@ fun GameScreen(
                                 color = Color(0xFFFFB340)
                             )
                             Text(
-                                text = questionAnswer(
-                                    viewState,
-                                    questionCount.intValue,
-                                    it,
-                                    questionDif.value
-                                ).toString(),
+                                text = questionAnswer(viewState,questionCount.intValue,it,questionDif.value).toString(),
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -223,7 +201,6 @@ fun GameScreen(
 
                         }
                     }
-
                 }
             }
             LazyRow(
@@ -248,6 +225,7 @@ fun GameScreen(
     }
 }
 
+
 @Composable
 fun questionAnswer(viewState: QuestionState, question: Int, count: Int, dif: Int): String? {
     when (dif) {
@@ -267,25 +245,4 @@ fun question(viewState: QuestionState, count: Int, dif: Int): String? {
     }
     return "Я заебался"
 }
-
-@Composable
-fun countDownTimer(value: MutableState<Int>, boolean: MutableState<Boolean>): Int {
-    var seconds by remember { mutableStateOf(value) }
-    var isRunning by remember { mutableStateOf(boolean) }
-    LaunchedEffect(Unit) {
-        while (value.value > 0) {
-            delay(1000)
-            seconds.value--
-        }
-    }
-    if (!isRunning.value) {
-        seconds = value
-        isRunning.value = true
-    }
-    return seconds.value
-}
-
-
-
-
 
