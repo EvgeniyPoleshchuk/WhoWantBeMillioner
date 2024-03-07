@@ -45,10 +45,11 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("MainScreen")
                         }
                     }
-                    composable("EndScreen"){
+                    composable("EndScreen") {
                         EndScreen(
-                            navigateToMainScreen = { navController.navigate("MainScreen")},
-                            navigateToGameScreen = { navController.navigate("GameScreen")})
+                            navigateToMainScreen = { navController.navigate("MainScreen") },
+                            navigateToGameScreen = { navController.navigate("GameScreen") }
+                        )
                     }
 
                 }

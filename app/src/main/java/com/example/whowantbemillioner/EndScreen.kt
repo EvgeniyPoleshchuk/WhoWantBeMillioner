@@ -1,7 +1,6 @@
 package com.example.whowantbemillioner
 
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,12 +28,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-
 
 
 @Composable
-fun EndScreen(navigateToMainScreen:()->Unit ,navigateToGameScreen:()->Unit,level: Int = 0, coin:Int = 0) {
+fun EndScreen(
+    navigateToMainScreen: () -> Unit,
+    navigateToGameScreen: () -> Unit,
+    level: Int = 0,
+    coin: Int = 0
+) {
 
     Column(
         modifier = Modifier
@@ -69,25 +71,27 @@ fun EndScreen(navigateToMainScreen:()->Unit ,navigateToGameScreen:()->Unit,level
             text = "Ваш уровень  " + level,
             fontSize = 19.sp,
             color = Color.Gray
-            )
+        )
         Spacer(modifier = Modifier.height(8.dp))
         Row {
 
             Image(
                 painter = painterResource(id = R.drawable.coin),
                 contentDescription = "Coin",
-                Modifier.padding(2.dp).size(16.dp),
-                )
+                Modifier
+                    .padding(2.dp)
+                    .size(16.dp),
+            )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = coin.toString(),
                 fontSize = 16.sp,
-                color = Color.Gray)
+                color = Color.Gray
+            )
         }
 
         Spacer(modifier = Modifier.height(100.dp))
         Box(
-            //Start game
             modifier = Modifier
                 .fillMaxWidth()
                 .size(80.dp)
@@ -124,7 +128,6 @@ fun EndScreen(navigateToMainScreen:()->Unit ,navigateToGameScreen:()->Unit,level
         }
         Spacer(modifier = Modifier.height(16.dp))
         Box(
-            //Rule
             modifier = Modifier
                 .fillMaxWidth()
                 .size(80.dp)
@@ -167,6 +170,6 @@ fun EndScreen(navigateToMainScreen:()->Unit ,navigateToGameScreen:()->Unit,level
 
 @Preview
 @Composable
-fun EndScreenPreview(){
-    EndScreen({},{} )
+fun EndScreenPreview() {
+    EndScreen({}, {})
 }
