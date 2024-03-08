@@ -35,6 +35,6 @@ class MainViewModel : ViewModel() {
 
 data class QuestionState(
     val loading: Boolean = true,
-    val list: QuestionsAll? =null,
+    val list: QuestionsAll? = null,
     val error: String? = null
 )

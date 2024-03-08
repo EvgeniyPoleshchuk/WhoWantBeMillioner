@@ -1,5 +1,8 @@
 package com.example.whowantbemillioner
 
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,29 +47,30 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 
 var resulInfo: ResulInfo? = null
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
     onClick: () -> Unit,
     EndGameScreen: () -> Unit
-){
+) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
-    var buttonOff by remember { mutableStateOf(true) }
+    var isButtonEnabled by remember { mutableStateOf(true) }
     val questionCount = remember { mutableIntStateOf(0) }
     val questionDif = remember { mutableStateOf(0) }
-    var timerRepeat = remember { mutableStateOf(true) }
-    var timerCount = remember { mutableStateOf(30) }
+    val timerRepeat = remember { mutableStateOf(true) }
+    val timerCount = remember { mutableStateOf(30) }
     val count = remember { mutableIntStateOf(0) }
-    if (timerCount.value == 0 || count.intValue == 14) {
-        buttonOff = false
+
+
+    if (timerCount.value == 0 || count.intValue == 14 ) {
         EndGameScreen()
-        resulInfo = ResulInfo(count.intValue + 1,cashList()[count.intValue])
+        resulInfo = ResulInfo(count.intValue + 1, cashList()[count.intValue])
     }
 
     if (questionCount.intValue == 5) {
@@ -85,7 +89,7 @@ fun GameScreen(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "QUESTION ${count.intValue+1}",
+                            text = "QUESTION ${count.intValue + 1}",
                             color = Color.White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -143,7 +147,7 @@ fun GameScreen(
 
             }
             Text(
-                text = question(viewState, questionCount.intValue, questionDif.value).toString(),
+                text = question(viewState,questionCount.intValue, questionDif.value),
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -168,22 +172,26 @@ fun GameScreen(
                         "false" -> painterResource(id = R.drawable.answer_red)
                         else -> painterResource(id = R.drawable.answer_blue)
                     }
+                    val timerHandler = Handler(Looper.getMainLooper())
+                    val timerRunnable = Runnable {
+                        count.intValue++
+                        questionCount.intValue++
+                        isButtonEnabled = true
+                        answer = "t"
+                        timerCount.value = 30
+                        timerRepeat.value = true
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .size(65.dp)
-                            .clickable(enabled = buttonOff) {
+                            .clickable(enabled = isButtonEnabled) {
                                 answer = "true"
-                                buttonOff = false
+                                isButtonEnabled = false
                                 timerRepeat.value = false
-                                timerCount.value = 30
-                                questionCount.intValue++
-                                count.intValue++
-                                answer = "d"
-                                buttonOff = true
-
-
+                                timerHandler.postDelayed(timerRunnable, 5000)
                             }
+
                     ) {
                         Image(
                             painter = color,
@@ -211,13 +219,11 @@ fun GameScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFFB340)
                             )
+
                             Text(
-                                text = questionAnswer(
-                                    viewState,
+                                text = questionAnswer(viewState,
                                     questionCount.intValue,
-                                    it,
-                                    questionDif.value
-                                ).toString(),
+                                    questionDif.value)[it],
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -250,42 +256,53 @@ fun GameScreen(
     }
 }
 
-@Composable
-fun questionAnswer(viewState: QuestionState, question: Int, count: Int, dif: Int): String? {
-    when (dif) {
-        0 -> return viewState.list?.questionEasy?.data?.get(question)?.answers?.get(count)
-        1 -> return viewState.list?.questionMedium?.data?.get(question)?.answers?.get(count)
-        2 -> return viewState.list?.questionHard?.data?.get(question)?.answers?.get(count)
+fun questionAnswer(viewState:QuestionState, question: Int, dif: Int): List<String> {
+   var a = listOf("","","","")
+    if(viewState.list != null){
+     a = when (dif) {
+         0 -> viewState.list.questionEasy.data.get(question).answers
+         1 -> viewState.list.questionMedium.data.get(question).answers
+         2 -> viewState.list.questionHard.data.get(question).answers
+            else -> {
+                listOf("")
+            }
+        }
     }
-    return "Я заебался"
+    return a
+}
+
+
+
+fun question(viewState:QuestionState,count: Int, dif: Int): String {
+    var a = ""
+    if(viewState.list != null) {
+       a = when (dif) {
+            0 -> return viewState.list.questionEasy.data.get(count).question
+            1 -> return viewState.list.questionMedium.data.get(count).question
+            2 -> return viewState.list.questionHard.data.get(count).question
+           else -> {
+               ""
+           }
+       }
+    }
+    return a
 }
 
 @Composable
-fun question(viewState: QuestionState, count: Int, dif: Int): String? {
-    when (dif) {
-        0 -> return viewState.list?.questionEasy?.data?.get(count)?.question
-        1 -> return viewState.list?.questionMedium?.data?.get(count)?.question
-        2 -> return viewState.list?.questionHard?.data?.get(count)?.question
-    }
-    return "Я заебался"
-}
-
-@Composable
-fun countDownTimer(value: MutableState<Int>, boolean: MutableState<Boolean>): Int {
+fun countDownTimer(value: MutableState<Int>, isRunning: MutableState<Boolean>): Int {
     var seconds by remember { mutableStateOf(value) }
-    var isRunning by remember { mutableStateOf(boolean) }
-    LaunchedEffect(Unit) {
-        while (value.value > 0) {
+    LaunchedEffect(isRunning.value) {
+        while (isRunning.value) {
             delay(1000)
             seconds.value--
         }
     }
     if (!isRunning.value) {
         seconds = value
-        isRunning.value = true
     }
     return seconds.value
 }
+
 
 
 
