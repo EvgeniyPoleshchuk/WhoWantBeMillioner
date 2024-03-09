@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -73,7 +74,14 @@ fun GameScreen(
     val timerRepeat = remember { mutableStateOf(true) }
     val timerCount = remember { mutableStateOf(30) }
     val count = remember { mutableIntStateOf(0) }
+    var timerColor by remember { mutableStateOf(Color.White) }
+    var isChecked by remember { mutableStateOf(true) }
 
+    timerColor = when (timerCount.value){
+        in 11..20 -> Color(0xFFFFB340)
+        in 0..10 -> Color(0xFFFF6231)
+        else -> Color.White
+    }
     questionViewModel.loadQuestions(questionCount.intValue)
 
     val shuffledAnswers by remember(viewState.answers) {
@@ -81,13 +89,10 @@ fun GameScreen(
     }
 
 
-    if (timerCount.value == 0 || count.intValue == 14 ) {
+    if (timerCount.value == 0 || count.intValue == 14 || !isChecked ) {
         EndGameScreen()
         resulInfo = ResulInfo(count.intValue + 1, cashList()[count.intValue])
     }
-
-
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -98,14 +103,14 @@ fun GameScreen(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "QUESTION ${count.intValue + 1}",
-                            color = Color.White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
+                            text = "ВОПРОС ${count.intValue + 1}",
+                            color = White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
                             text = cashList()[count.intValue],
-                            color = Color.White, // Оставляем цвет остального текста без изменений
+                            color = White, // Оставляем цвет остального текста без изменений
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -116,7 +121,7 @@ fun GameScreen(
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Localized description",
-                            tint = Color.White
+                            tint = White
                         )
                     }
                 },
@@ -145,19 +150,19 @@ fun GameScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.stopwatch),
                     contentDescription = null,
-                    tint = Color(0xFFFFB340).copy(alpha = 1F)
+                    tint = timerColor.copy(alpha = 1F)
                 )
                 Text(
                     text = countDownTimer(timerCount, timerRepeat).toString(),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFFB340).copy(alpha = 1F)
+                    color = timerColor.copy(alpha = 1F)
                 )
 
             }
             Text(
                 text = viewState.question,
-                color = Color.White,
+                color = White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -176,7 +181,7 @@ fun GameScreen(
             ) {
                 items(4) {
                     var currentAnswer by remember { mutableStateOf("") }
-                    var isChecked by remember { mutableStateOf(false) }
+
                     val color = when (currentAnswer) {
                         "true" -> painterResource(id = R.drawable.answer_green)
                         "false" -> painterResource(id = R.drawable.answer_red)
@@ -259,7 +264,7 @@ fun GameScreen(
                                 text = shuffledAnswers[it],
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = White
                             )
 
                         }
