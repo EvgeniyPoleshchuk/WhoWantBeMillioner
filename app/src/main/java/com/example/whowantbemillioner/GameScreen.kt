@@ -72,6 +72,7 @@ fun GameScreen(
     val timerRepeat = remember { mutableStateOf(true) }
     val timerCount = remember { mutableStateOf(30) }
     val count = remember { mutableIntStateOf(0) }
+    val isUsedHelpList by lazy { mutableListOf(false, false, false) }  // список использования подсказок
 
     questionViewModel.loadQuestions(questionCount.intValue)
 
@@ -264,7 +265,8 @@ fun GameScreen(
                         painter = painterResource(id = buttonList[it]),
                         contentDescription = null,
                         modifier = Modifier.size(95.dp, 75.dp),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        alpha = if (isUsedHelpList[it]) 0.2F else 1F
                     )
                 }
 
