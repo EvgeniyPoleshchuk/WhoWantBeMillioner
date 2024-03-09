@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +48,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 var resulInfo: ResulInfo? = null
 
@@ -55,29 +58,28 @@ var resulInfo: ResulInfo? = null
 @Composable
 fun GameScreen(
     onClick: () -> Unit,
-    EndGameScreen: () -> Unit
+    EndGameScreen: () -> Unit,
+    navController: NavHostController,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
+    val trueAnswer = viewState.question?.answers?.get(0)
+
+    val scope = rememberCoroutineScope()
     var isButtonEnabled by remember { mutableStateOf(true) }
     val questionCount = remember { mutableIntStateOf(0) }
-    val questionDif = remember { mutableStateOf(0) }
     val timerRepeat = remember { mutableStateOf(true) }
     val timerCount = remember { mutableStateOf(30) }
     val count = remember { mutableIntStateOf(0) }
+
+    questionViewModel.loadQuestions(questionCount.intValue)
 
 
     if (timerCount.value == 0 || count.intValue == 14 ) {
         EndGameScreen()
         resulInfo = ResulInfo(count.intValue + 1, cashList()[count.intValue])
     }
-
-    if (questionCount.intValue == 5) {
-        questionCount.intValue = 0
-        questionDif.value++
-    }
-
 
     Scaffold(
         topBar = {
@@ -147,7 +149,7 @@ fun GameScreen(
 
             }
             Text(
-                text = question(viewState,questionCount.intValue, questionDif.value),
+                text = viewState.question?.question ?: "",
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -167,29 +169,46 @@ fun GameScreen(
             ) {
                 items(4) {
                     var answer by remember { mutableStateOf("") }
-                    var color = when (answer) {
+                    var isChecked by remember { mutableStateOf("") }
+                    val color = when (answer) {
                         "true" -> painterResource(id = R.drawable.answer_green)
                         "false" -> painterResource(id = R.drawable.answer_red)
+                        "check" -> painterResource(id = R.drawable.big_rectangle_gold)
                         else -> painterResource(id = R.drawable.answer_blue)
                     }
                     val timerHandler = Handler(Looper.getMainLooper())
                     val timerRunnable = Runnable {
-                        count.intValue++
-                        questionCount.intValue++
-                        isButtonEnabled = true
                         answer = "t"
-                        timerCount.value = 30
-                        timerRepeat.value = true
+                        navController.navigate(
+                            "ProgressScreen" + "/${questionCount.intValue}" + "/{$isChecked}")
+//                        toProgressScreen()
                     }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .size(65.dp)
                             .clickable(enabled = isButtonEnabled) {
-                                answer = "true"
                                 isButtonEnabled = false
                                 timerRepeat.value = false
-                                timerHandler.postDelayed(timerRunnable, 5000)
+                                answer = "check"
+                                scope.launch {
+                                    delay(5000)
+                                    if (viewState.question?.answers?.get(it) == trueAnswer) {
+                                        answer = "true"
+                                        isChecked = "true"
+                                    } else {
+                                        answer =  "false"
+                                        isChecked = "false"
+                                    }
+
+                                    count.intValue++
+                                    questionCount.intValue++
+                                    isButtonEnabled = true
+                                    timerCount.value = 30
+                                    timerRepeat.value = true
+                                    Log.i("!!!", "$viewState")
+                                }
+                                timerHandler.postDelayed(timerRunnable, 6000)
                             }
 
                     ) {
@@ -221,9 +240,7 @@ fun GameScreen(
                             )
 
                             Text(
-                                text = questionAnswer(viewState,
-                                    questionCount.intValue,
-                                    questionDif.value)[it],
+                                text = viewState.question?.answers?.get(it) ?: "",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -254,38 +271,6 @@ fun GameScreen(
             }
         }
     }
-}
-
-fun questionAnswer(viewState:QuestionState, question: Int, dif: Int): List<String> {
-   var a = listOf("","","","")
-    if(viewState.list != null){
-     a = when (dif) {
-         0 -> viewState.list.questionEasy.data.get(question).answers
-         1 -> viewState.list.questionMedium.data.get(question).answers
-         2 -> viewState.list.questionHard.data.get(question).answers
-            else -> {
-                listOf("")
-            }
-        }
-    }
-    return a
-}
-
-
-
-fun question(viewState:QuestionState,count: Int, dif: Int): String {
-    var a = ""
-    if(viewState.list != null) {
-       a = when (dif) {
-            0 -> return viewState.list.questionEasy.data.get(count).question
-            1 -> return viewState.list.questionMedium.data.get(count).question
-            2 -> return viewState.list.questionHard.data.get(count).question
-           else -> {
-               ""
-           }
-       }
-    }
-    return a
 }
 
 @Composable

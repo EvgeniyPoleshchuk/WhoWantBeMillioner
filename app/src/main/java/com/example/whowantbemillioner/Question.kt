@@ -24,3 +24,12 @@ data class QuestionsHard(
 data class QuestionsResponseEasy(val data: List<QuestionsEasy>)
 data class QuestionsResponseMedium(val data: List<QuestionsMedium>)
 data class QuestionsResponseHard(val data: List<QuestionsHard>)
+
+data class Questions(
+    val questions: List<Question>
+)
+
+data class Question(
+    val question: String,
+    val answers: List<String>,
+)

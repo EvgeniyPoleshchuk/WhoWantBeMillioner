@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-            var navController = rememberNavController()
+            val navController = rememberNavController()
             WhoWantBeMillionerTheme {
                 NavHost(
                     navController = navController,
@@ -24,15 +24,20 @@ class MainActivity : ComponentActivity() {
                     composable("MainScreen") {
                         MainScreen(navController = navController)
                     }
-                    composable("ProgressScreen") {
-                        ProgressScreen {
-                            navController.navigate("GameScreen")
-                        }
+                    composable("ProgressScreen" + "/{counter}" + "/{isChecked}") { navBackStack ->
+                        val counter = navBackStack.arguments?.getString("counter")
+                        val isChecked = navBackStack.arguments?.getString("counter").toBoolean()
+                        ProgressScreen(
+                            onClick = { navController.navigate("GameScreen") },
+                            counter = counter?.toInt(),
+                            isChecked = isChecked
+                        )
                     }
                     composable("GameScreen") {
                         GameScreen(
                             onClick = {navController.navigate("MainScreen")},
-                            EndGameScreen = {navController.navigate("EndScreen")}
+                            EndGameScreen = {navController.navigate("EndScreen")},
+                            navController = navController
                         )
                     }
                     composable("RulesScreen") {
@@ -44,7 +49,6 @@ class MainActivity : ComponentActivity() {
                         EndScreen(
                             navigateToMainScreen = { navController.navigate("MainScreen") },
                             navigateToGameScreen = { navController.navigate("GameScreen") },
-
 
                         )
                     }
