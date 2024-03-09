@@ -2,8 +2,9 @@ package com.example.whowantbemillioner
 
 object STUB {
 
-    fun getAllQuestions() = Questions(questionsEasy + questionsMedium + questionsHard)
+    private fun getAllQuestions() = Questions(questionsEasy + questionsMedium + questionsHard)
     fun getQuestion(number: Int) = getAllQuestions().questions[number]
+    fun getTrueAnswer() = getAllQuestions().questions.map { it.answers.first() }
 
     private val questionsEasy = listOf(
         Question(
@@ -26,7 +27,7 @@ object STUB {
             question = "Кто приходит под Новый год к хорошим детям?",
             answers = listOf("Дед Мороз", "Баба Яга", "Полицейский", "Шапокляк")
         )
-    ).shuffled()
+    )
 
     private val questionsMedium = listOf(
         Question(
@@ -49,7 +50,7 @@ object STUB {
             question = "В какой стране столица порт?",
             answers = listOf("Сингапур", "Италия", "Канада", "Мексика")
         )
-    ).shuffled()
+    )
 
     private val questionsHard = listOf(
         Question(
@@ -72,7 +73,7 @@ object STUB {
             question = "В честь какого растения область Фриули-Венеция-Джулия в Италии ежегодно проводит трёхмесячный фестиваль?",
             answers = listOf("Спаржа", "Лук", "Фасоль", "Артишок")
         )
-    ).shuffled()
+    )
 
 }
 

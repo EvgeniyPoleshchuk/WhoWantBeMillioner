@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -33,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -64,7 +67,6 @@ fun GameScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
-    val trueAnswer = viewState.question?.answers?.get(0)
 
     val scope = rememberCoroutineScope()
     var isButtonEnabled by remember { mutableStateOf(true) }
@@ -73,6 +75,7 @@ fun GameScreen(
     val timerCount = remember { mutableStateOf(30) }
     val count = remember { mutableIntStateOf(0) }
     var timerColor by remember { mutableStateOf(Color.White) }
+    var isChecked by remember { mutableStateOf(true) }
 
     timerColor = when (timerCount.value){
         in 11..20 -> Color(0xFFFFB340)
@@ -81,12 +84,15 @@ fun GameScreen(
     }
     questionViewModel.loadQuestions(questionCount.intValue)
 
+    val shuffledAnswers by remember(viewState.answers) {
+        mutableStateOf(viewState.answers.shuffled())
+    }
 
-    if (timerCount.value == 0 || count.intValue == 14 ) {
+
+    if (timerCount.value == 0 || count.intValue == 14 || !isChecked ) {
         EndGameScreen()
         resulInfo = ResulInfo(count.intValue + 1, cashList()[count.intValue])
     }
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -98,13 +104,13 @@ fun GameScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "ВОПРОС ${count.intValue + 1}",
-                            color = Color.White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
+                            color = White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
                             text = cashList()[count.intValue],
-                            color = Color.White, // Оставляем цвет остального текста без изменений
+                            color = White, // Оставляем цвет остального текста без изменений
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -115,7 +121,7 @@ fun GameScreen(
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Localized description",
-                            tint = Color.White
+                            tint = White
                         )
                     }
                 },
@@ -134,7 +140,7 @@ fun GameScreen(
             Row(
                 modifier = Modifier
                     .background(
-                        color = timerColor.copy(alpha = 0.3F),
+                        color = Color(0xFFFFB340).copy(alpha = 0.3F),
                         shape = RoundedCornerShape(50.dp)
                     )
                     .padding(16.dp, 8.dp, 16.dp, 8.dp),
@@ -150,12 +156,13 @@ fun GameScreen(
                     text = countDownTimer(timerCount, timerRepeat).toString(),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = timerColor
+                    color = timerColor.copy(alpha = 1F)
                 )
+
             }
             Text(
-                text = viewState.question?.question ?: "",
-                color = Color.White,
+                text = viewState.question,
+                color = White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -173,21 +180,21 @@ fun GameScreen(
                 verticalArrangement = Arrangement.SpaceAround
             ) {
                 items(4) {
-                    var answer by remember { mutableStateOf("") }
-                    var isChecked by remember { mutableStateOf("") }
-                    val color = when (answer) {
+                    var currentAnswer by remember { mutableStateOf("") }
+
+                    val color = when (currentAnswer) {
                         "true" -> painterResource(id = R.drawable.answer_green)
                         "false" -> painterResource(id = R.drawable.answer_red)
                         "check" -> painterResource(id = R.drawable.big_rectangle_gold)
                         else -> painterResource(id = R.drawable.answer_blue)
                     }
                     val timerHandler = Handler(Looper.getMainLooper())
-                    val timerRunnable = Runnable {
-                        answer = "t"
-                        navController.navigate(
-                            "ProgressScreen" + "/${questionCount.intValue}" + "/{$isChecked}")
-//                        toProgressScreen()
-                    }
+//                    val timerRunnable = Runnable {
+//                        answer = "t"
+//                        navController.navigate(
+//                            "ProgressScreen" + "/${questionCount.intValue}" + "/{$isChecked}")
+////                        toProgressScreen()
+//                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -195,25 +202,33 @@ fun GameScreen(
                             .clickable(enabled = isButtonEnabled) {
                                 isButtonEnabled = false
                                 timerRepeat.value = false
-                                answer = "check"
+                                currentAnswer = "check"
                                 scope.launch {
                                     delay(5000)
-                                    if (viewState.question?.answers?.get(it) == trueAnswer) {
-                                        answer = "true"
-                                        isChecked = "true"
+                                    if (STUB
+                                            .getTrueAnswer()
+                                            .contains(shuffledAnswers[it])
+                                    ) {
+                                        currentAnswer = "true"
+                                        isChecked = true
                                     } else {
-                                        answer =  "false"
-                                        isChecked = "false"
+                                        currentAnswer = "false"
+                                        isChecked = false
                                     }
 
-                                    count.intValue++
-                                    questionCount.intValue++
                                     isButtonEnabled = true
                                     timerCount.value = 30
                                     timerRepeat.value = true
-                                    Log.i("!!!", "$viewState")
+                                    Log.i("!!!", "$isChecked")
+                                    delay(1000)
+                                    currentAnswer = "t"
+//                                    navController.navigate(
+//                                        "ProgressScreen/${questionCount.intValue}/{$isChecked}"
+//                                    )
+                                    count.intValue++
+                                    questionCount.intValue++
                                 }
-                                timerHandler.postDelayed(timerRunnable, 6000)
+//                                timerHandler.postDelayed(timerRunnable, 6000)
                             }
 
                     ) {
@@ -244,11 +259,12 @@ fun GameScreen(
                                 color = Color(0xFFFFB340)
                             )
 
+
                             Text(
-                                text = viewState.question?.answers?.get(it) ?: "",
+                                text = shuffledAnswers[it],
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = White
                             )
 
                         }
@@ -292,3 +308,9 @@ fun countDownTimer(value: MutableState<Int>, isRunning: MutableState<Boolean>): 
     }
     return seconds.value
 }
+
+
+
+
+
+
