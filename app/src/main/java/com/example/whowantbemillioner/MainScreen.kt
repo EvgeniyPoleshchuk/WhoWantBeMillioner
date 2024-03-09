@@ -1,8 +1,5 @@
 package com.example.whowantbemillioner
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -80,7 +77,7 @@ fun MainScreen(navController: NavController) {
                         indication = null,
                         interactionSource = MutableInteractionSource()
                     ) {
-                        navController.navigate("ProgressScreen")
+                        navController.navigate("GameScreen")
                     }
             )
             Row(
