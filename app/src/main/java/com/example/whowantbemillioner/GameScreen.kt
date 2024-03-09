@@ -87,12 +87,26 @@ fun GameScreen(
     val shuffledAnswers by remember(viewState.answers) {
         mutableStateOf(viewState.answers.shuffled())
     }
-
-
-    if (timerCount.value == 0 || count.intValue == 14 || !isChecked ) {
-        EndGameScreen()
-        resulInfo = ResulInfo(count.intValue + 1, cashList()[count.intValue])
+    when {
+        (timerCount.value == 0 || count.intValue >= 5) && !isChecked -> {
+            resulInfo = ResulInfo(count.intValue + 1, cashList().get(4))
+            EndGameScreen()
+        }
+        (timerCount.value == 0 || count.intValue in 10..13) && !isChecked -> {
+            resulInfo = ResulInfo(count.intValue + 1, cashList().get(9))
+            EndGameScreen()
+        }
+        (timerCount.value == 0 || count.intValue == 15) && !isChecked -> {
+            resulInfo = ResulInfo(count.intValue + 1, cashList().get(14))
+            EndGameScreen()
+        }
+        (timerCount.value == 0 || count.intValue == 0) && !isChecked -> {
+            resulInfo = ResulInfo(count.intValue + 1, "$0")
+            EndGameScreen()
+        }
     }
+
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
