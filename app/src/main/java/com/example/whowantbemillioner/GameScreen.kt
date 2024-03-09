@@ -66,7 +66,13 @@ fun GameScreen(
     val timerRepeat = remember { mutableStateOf(true) }
     val timerCount = remember { mutableStateOf(30) }
     val count = remember { mutableIntStateOf(0) }
+    var timerColor by remember { mutableStateOf(Color.White) }
 
+    timerColor = when (timerCount.value){
+        in 11..20 -> Color(0xFFFFB340)
+        in 0..10 -> Color(0xFFFF6231)
+        else -> Color.White
+    }
 
     if (timerCount.value == 0 || count.intValue == 14 ) {
         EndGameScreen()
@@ -89,7 +95,7 @@ fun GameScreen(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "QUESTION ${count.intValue + 1}",
+                            text = "ВОПРОС ${count.intValue + 1}",
                             color = Color.White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -126,7 +132,7 @@ fun GameScreen(
             Row(
                 modifier = Modifier
                     .background(
-                        color = Color(0xFFFFB340).copy(alpha = 0.3F),
+                        color = timerColor.copy(alpha = 0.3F),
                         shape = RoundedCornerShape(50.dp)
                     )
                     .padding(16.dp, 8.dp, 16.dp, 8.dp),
@@ -136,15 +142,14 @@ fun GameScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.stopwatch),
                     contentDescription = null,
-                    tint = Color(0xFFFFB340).copy(alpha = 1F)
+                    tint = timerColor.copy(alpha = 1F)
                 )
                 Text(
                     text = countDownTimer(timerCount, timerRepeat).toString(),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFFB340).copy(alpha = 1F)
+                    color = timerColor
                 )
-
             }
             Text(
                 text = question(viewState,questionCount.intValue, questionDif.value),
@@ -302,9 +307,3 @@ fun countDownTimer(value: MutableState<Int>, isRunning: MutableState<Boolean>): 
     }
     return seconds.value
 }
-
-
-
-
-
-
