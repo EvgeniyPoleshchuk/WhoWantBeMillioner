@@ -34,10 +34,9 @@ import androidx.compose.ui.unit.sp
 fun EndScreen(
     navigateToMainScreen: () -> Unit,
     navigateToGameScreen: () -> Unit,
-    level: Int = 0,
-    coin: Int = 0
+    level: Int? = resulInfo?.coin,
+    coin: String? = resulInfo?.cash
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,7 +107,7 @@ fun EndScreen(
                         interactionSource = MutableInteractionSource()
                     ) {
 //                        navController.navigate("GameScreen")
-                        navigateToGameScreen
+                          navigateToGameScreen()
                     }
             )
             Row(
@@ -144,7 +143,7 @@ fun EndScreen(
                         interactionSource = MutableInteractionSource()
                     ) {
 //                        navController.navigate("MainScreen")
-                        navigateToMainScreen
+                        navigateToMainScreen()
 
                     }
             )

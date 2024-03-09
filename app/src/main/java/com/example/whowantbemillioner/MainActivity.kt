@@ -3,14 +3,6 @@ package com.example.whowantbemillioner
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +12,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
             val navController = rememberNavController()
             WhoWantBeMillionerTheme {
                 NavHost(
@@ -27,18 +20,25 @@ class MainActivity : ComponentActivity() {
                     startDestination = "MainScreen"
                 ) {
 
+
                     composable("MainScreen") {
                         MainScreen(navController = navController)
                     }
-                    composable("ProgressScreen") {
-                        ProgressScreen {
-                            navController.navigate("GameScreen")
-                        }
+                    composable("ProgressScreen" + "/{counter}" + "/{isChecked}") { navBackStack ->
+                        val counter = navBackStack.arguments?.getString("counter")
+                        val isChecked = navBackStack.arguments?.getString("counter").toBoolean()
+                        ProgressScreen(
+                            onClick = { navController.navigate("GameScreen") },
+                            counter = counter?.toInt(),
+                            isChecked = isChecked
+                        )
                     }
                     composable("GameScreen") {
-                        GameScreen {
-                            navController.navigate("MainScreen")
-                        }
+                        GameScreen(
+                            onClick = {navController.navigate("MainScreen")},
+                            EndGameScreen = {navController.navigate("EndScreen")},
+                            navController = navController
+                        )
                     }
                     composable("RulesScreen") {
                         RulesScreen {
@@ -48,7 +48,8 @@ class MainActivity : ComponentActivity() {
                     composable("EndScreen") {
                         EndScreen(
                             navigateToMainScreen = { navController.navigate("MainScreen") },
-                            navigateToGameScreen = { navController.navigate("GameScreen") }
+                            navigateToGameScreen = { navController.navigate("GameScreen") },
+
                         )
                     }
 
