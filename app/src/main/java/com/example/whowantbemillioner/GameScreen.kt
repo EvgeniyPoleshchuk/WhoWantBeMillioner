@@ -89,6 +89,8 @@ fun GameScreen(
         EndGameScreen()
         resulInfo = ResulInfo(questionCount.intValue + 1, cashList()[questionCount.intValue])
     }
+
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
