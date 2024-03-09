@@ -24,27 +24,16 @@ class MainActivity : ComponentActivity() {
                     composable("MainScreen") {
                         MainScreen(navController = navController)
                     }
-                    composable("ProgressScreen/{counter}/{isChecked}",
-                        arguments = listOf(                                         // declaring argument type
-                            navArgument("counter") { type = NavType.StringType },
-                            navArgument("isChecked") { type = NavType.StringType },
-                        )
-                    ) { navBackStack ->
-                        val counter = navBackStack.arguments?.getString("counter")?.toInt()
-//                        val isCheckedString = navBackStack.arguments?.getString("isChecked")
-//                        val isChecked = isCheckedString?.toBoolean() ?: false
-
-                        val isChecked = navBackStack.arguments?.getBoolean("isChecked")
+                    composable("ProgressScreen") {
                         ProgressScreen(
+                            endGameScreen = { navController.navigate("EndScreen") },
                             onClick = { navController.navigate("GameScreen") },
-                            counter = counter,
-                            isChecked = isChecked
                         )
                     }
                     composable("GameScreen") {
                         GameScreen(
-                            onClick = {navController.navigate("MainScreen")},
-                            EndGameScreen = {navController.navigate("EndScreen")},
+                            onClick = { navController.navigate("MainScreen") },
+                            EndGameScreen = { navController.navigate("EndScreen") },
                             navController = navController
                         )
                     }
@@ -58,7 +47,7 @@ class MainActivity : ComponentActivity() {
                             navigateToMainScreen = { navController.navigate("MainScreen") },
                             navigateToGameScreen = { navController.navigate("GameScreen") },
 
-                        )
+                            )
                     }
                 }
             }
