@@ -10,12 +10,15 @@ class MainViewModel : ViewModel() {
 
     fun loadQuestions(number: Int) {
         val question = STUB.getQuestion(number)
+
         _questionState.value = _questionState.value.copy(
-            question = question
+            question = question.question,
+            answers = question.answers
         )
     }
 }
 
 data class QuestionState(
-    val question: Question? = null,
+    val question: String = "",
+    val answers: List<String> = listOf()
 )

@@ -61,11 +61,9 @@ fun ProgressScreen(
                 val color =
                     if (it + 1 == 5 || it + 1 == 10) painterResource(id = R.drawable.rectangle_blue)
                     else if (it + 1 == 15) painterResource(id = R.drawable.rectangle_gold)
-                    else if (it + 1 == counter) painterResource(id = R.drawable.answer_green)
+                    else if (it + 1 == counter && isChecked == true) painterResource(id = R.drawable.answer_green)
                     else if (it + 1 == counter && isChecked == false) painterResource(id = R.drawable.answer_red)
                     else painterResource(id = R.drawable.rectangle_dark_blue)
-
-
 
                 Box(
                     modifier = Modifier
