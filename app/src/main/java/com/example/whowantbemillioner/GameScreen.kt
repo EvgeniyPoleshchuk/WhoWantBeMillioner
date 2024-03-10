@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -38,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
@@ -55,7 +53,7 @@ import kotlinx.coroutines.launch
 
 var resulInfo: ResulInfo? = null
 var currentInfo: CurrentInfo? = null
-var buttonInfo: ButtonInfo? = null
+var buttonInfo: ButtonInfo = ButtonInfo()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,9 +65,9 @@ fun GameScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
-    var buffonHelper = remember { mutableStateOf(true) }
-    var buffonHelper2 = remember { mutableStateOf(true) }
-    var buffonHelper3 = remember { mutableStateOf(true) }
+    val buffonHelper = remember { mutableStateOf(true) }
+    val buffonHelper2 = remember { mutableStateOf(true) }
+    val buffonHelper3 = remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     var isButtonEnabled by remember { mutableStateOf(true) }
     val questionCount = remember { mutableIntStateOf(currentInfo?.number ?: 0) }
@@ -77,6 +75,10 @@ fun GameScreen(
     val timerCount = remember { mutableStateOf(30) }
     var timerColor by remember { mutableStateOf(White) }
     var isChecked by remember { mutableStateOf(true) }
+    val alpha = remember { mutableFloatStateOf(buttonInfo.alfa) }
+    val alpha2 = remember { mutableFloatStateOf(buttonInfo.alfa2) }
+    val alpha3 = remember { mutableFloatStateOf(buttonInfo.alfa3) }
+
 
 
 
@@ -273,10 +275,9 @@ fun GameScreen(
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-
-                var alfa = buttonInfo?.alfa?:1f
-                var alfa2 =buttonInfo?.alfa2?:1f
-                var alfa3 =buttonInfo?.alfa3?:1f
+//                var alfa = buttonInfo.alfa
+//                var alfa2 =buttonInfo.alfa2
+//                var alfa3 =buttonInfo.alfa3
                 val buttonList =
                     listOf(R.drawable.fifty_fifty, R.drawable.life, R.drawable.call)
                     Image(
@@ -284,36 +285,39 @@ fun GameScreen(
                         contentDescription = null,
                         modifier = Modifier.size(95.dp, 75.dp)
                             .clickable(enabled = buffonHelper.value) {
-                                buttonInfo?.alfa = 0.5f
+                                alpha.floatValue = 0.5f
+                                buttonInfo = ButtonInfo(alfa = 0.5f, alfa2 = alpha2.floatValue, alfa3 = alpha3.floatValue)
                                 buffonHelper.value = false
                             },
                         contentScale = ContentScale.Crop,
-                       alpha = alfa
+                       alpha = alpha.floatValue
                     )
                 Image(
                     painter = painterResource(id = buttonList[1]),
                     contentDescription = null,
                     modifier = Modifier.size(95.dp, 75.dp)
                         .clickable(enabled = buffonHelper2.value) {
-                            buttonInfo?.alfa2 = 0.5f
+                            alpha2.floatValue = 0.5f
+                            buttonInfo = ButtonInfo(alfa = alpha.floatValue, alfa2 = 0.5f, alfa3 = alpha3.floatValue)
                             buffonHelper2.value = false
                         },
                     contentScale = ContentScale.Crop,
-                    alpha = alfa2
+                    alpha = alpha2.floatValue
                 )
                 Image(
                     painter = painterResource(id = buttonList[2]),
                     contentDescription = null,
                     modifier = Modifier.size(95.dp, 75.dp)
                         .clickable(enabled = buffonHelper3.value) {
-                            buttonInfo?.alfa3 = 0.5f
+                            alpha3.floatValue = 0.5f
+                            buttonInfo = ButtonInfo(alpha.floatValue, alfa2 = alpha2.floatValue, alfa3 = 0.5f)
                             buffonHelper3.value = false
                         },
                     contentScale = ContentScale.Crop,
-                    alpha = alfa3
+                    alpha = alpha3.floatValue
                 )
                 }
-
+                Log.i("!!!", "$buttonInfo")
             }
         }
     }
