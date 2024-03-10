@@ -280,25 +280,35 @@ fun GameScreen(
 //                var alfa3 =buttonInfo.alfa3
                 val buttonList =
                     listOf(R.drawable.fifty_fifty, R.drawable.life, R.drawable.call)
-                    Image(
-                        painter = painterResource(id = buttonList[0]),
-                        contentDescription = null,
-                        modifier = Modifier.size(95.dp, 75.dp)
-                            .clickable(enabled = buffonHelper.value) {
-                                alpha.floatValue = 0.5f
-                                buttonInfo = ButtonInfo(alfa = 0.5f, alfa2 = alpha2.floatValue, alfa3 = alpha3.floatValue)
-                                buffonHelper.value = false
-                            },
-                        contentScale = ContentScale.Crop,
-                       alpha = alpha.floatValue
-                    )
+                Image(
+                    painter = painterResource(id = buttonList[0]),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(95.dp, 75.dp)
+                        .clickable(enabled = buffonHelper.value) {
+                            alpha.floatValue = 0.5f
+                            buttonInfo = ButtonInfo(
+                                alfa = 0.5f,
+                                alfa2 = alpha2.floatValue,
+                                alfa3 = alpha3.floatValue
+                            )
+                            buffonHelper.value = false
+                        },
+                    contentScale = ContentScale.Crop,
+                    alpha = alpha.floatValue
+                )
                 Image(
                     painter = painterResource(id = buttonList[1]),
                     contentDescription = null,
-                    modifier = Modifier.size(95.dp, 75.dp)
+                    modifier = Modifier
+                        .size(95.dp, 75.dp)
                         .clickable(enabled = buffonHelper2.value) {
                             alpha2.floatValue = 0.5f
-                            buttonInfo = ButtonInfo(alfa = alpha.floatValue, alfa2 = 0.5f, alfa3 = alpha3.floatValue)
+                            buttonInfo = ButtonInfo(
+                                alfa = alpha.floatValue,
+                                alfa2 = 0.5f,
+                                alfa3 = alpha3.floatValue
+                            )
                             buffonHelper2.value = false
                         },
                     contentScale = ContentScale.Crop,
@@ -307,20 +317,25 @@ fun GameScreen(
                 Image(
                     painter = painterResource(id = buttonList[2]),
                     contentDescription = null,
-                    modifier = Modifier.size(95.dp, 75.dp)
+                    modifier = Modifier
+                        .size(95.dp, 75.dp)
                         .clickable(enabled = buffonHelper3.value) {
                             alpha3.floatValue = 0.5f
-                            buttonInfo = ButtonInfo(alpha.floatValue, alfa2 = alpha2.floatValue, alfa3 = 0.5f)
+                            buttonInfo = ButtonInfo(
+                                alpha.floatValue,
+                                alfa2 = alpha2.floatValue,
+                                alfa3 = 0.5f
+                            )
                             buffonHelper3.value = false
                         },
                     contentScale = ContentScale.Crop,
                     alpha = alpha3.floatValue
                 )
-                }
-                Log.i("!!!", "$buttonInfo")
             }
+            Log.i("!!!", "$buttonInfo")
         }
     }
+}
 
 @Composable
 fun countDownTimer(value: MutableState<Int>, isRunning: MutableState<Boolean>): Int {
