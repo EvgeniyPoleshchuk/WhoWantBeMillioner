@@ -3,6 +3,8 @@ package com.example.whowantbemillioner
 import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,15 +46,16 @@ fun ProgressScreen(
         "$7,500", "$10,000", "$12,500", "$15,000", "$25,000",
         "$50,000", "$100,000", "$250,000", "$500,000", "$1,000,000"
     )
+    var wins = ""
 
     if (isChecked == false) {
         LaunchedEffect(Unit) {
             delay(1000)
             if (number != null && resulInfo != null) {
-                val wins = when {
-                    number <= 4 -> "$5,000"
-                    number in 5..9 -> "$25,000"
-                    number == 14 -> "$1,000,000"
+                wins = when (number) {
+                    in 5..9 -> "$5,000"
+                    in 9..13 -> "$25,000"
+                    14 -> "$1,000,000"
                     else -> cashList()[number - 1]
                 }
                 questionsRepository.insertUserIntoCache(
@@ -78,6 +81,21 @@ fun ProgressScreen(
             ),
         contentAlignment = Alignment.TopCenter
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.withdrawal),
+            contentDescription = null,
+            alignment = Alignment.TopStart,
+            modifier = Modifier
+                .size(35.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = MutableInteractionSource()
+                ) {
+                    resulInfo = number?.let { ResulInfo(resulInfo!!.name, it, wins) }
+                    endGameScreen()
+                }
+        )
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()

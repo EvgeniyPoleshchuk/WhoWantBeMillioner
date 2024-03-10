@@ -85,14 +85,11 @@ fun GameScreen(
     val alpha = remember { mutableFloatStateOf(buttonInfo.alfa) }
     val alpha2 = remember { mutableFloatStateOf(buttonInfo.alfa2) }
     val alpha3 = remember { mutableFloatStateOf(buttonInfo.alfa3) }
-    var mediaPlayer by remember { mutableStateOf(MediaPlayer.create(application, R.raw.timer))}
+    val mediaPlayer by remember { mutableStateOf(MediaPlayer.create(application, R.raw.timer))}
     mediaPlayer.start()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val resultFriend = remember { mutableStateOf("") }
-
-
-
 
     timerColor = when (timerCount.value) {
         in 11..20 -> Color(0xFFFFB340)
