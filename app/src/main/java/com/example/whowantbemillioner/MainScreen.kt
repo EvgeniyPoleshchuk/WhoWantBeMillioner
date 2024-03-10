@@ -1,7 +1,9 @@
 package com.example.whowantbemillioner
 
+import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +16,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -26,10 +36,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.whowantbemillioner.data.QuestionsRepository
+import kotlinx.coroutines.launch
 
 
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(navController: NavController, application: Application) {
+    val scope = rememberCoroutineScope()
+    var playerName by rememberSaveable { mutableStateOf("") }
+    val questionsRepository = QuestionsRepository(application)
 
     Column(
         modifier = Modifier
@@ -60,6 +75,24 @@ fun MainScreen(navController: NavController) {
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(100.dp))
+        TextField(
+            value = playerName,
+            singleLine = true,
+            onValueChange = { playerName = it },
+            label = { Text("Введите ваше имя") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .border(4.dp, Color.White, RoundedCornerShape(16.dp)),
+            shape = RoundedCornerShape(16.dp),
+            colors = TextFieldDefaults.colors(
+                focusedTextColor = Color.Black,
+                focusedContainerColor = Color.LightGray,
+                unfocusedContainerColor = Color.LightGray,
+                disabledContainerColor = Color.LightGray,
+            )
+        )
+        Spacer(modifier = Modifier.height(20.dp))
         Box(
             //Start game
             modifier = Modifier
@@ -77,8 +110,21 @@ fun MainScreen(navController: NavController) {
                         indication = null,
                         interactionSource = MutableInteractionSource()
                     ) {
-                        currentInfo = CurrentInfo(0,true)
+                        currentInfo = CurrentInfo(0, true)
                         buttonInfo = ButtonInfo(1f, 1f, 1f)
+
+                        if (playerName != "") {
+                            resulInfo = ResulInfo(playerName, 0, "0")
+                            scope.launch {
+                                questionsRepository.insertUserIntoCache(
+                                    ResulInfo(
+                                        name = playerName,
+                                        coin = 0,
+                                        cash = "0"
+                                    )
+                                )
+                            }
+                        }
                         navController.navigate("GameScreen")
                     }
             )
@@ -137,3 +183,4 @@ fun MainScreen(navController: NavController) {
         }
     }
 }
+

@@ -22,12 +22,13 @@ class MainActivity : ComponentActivity() {
                     startDestination = "MainScreen"
                 ) {
                     composable("MainScreen") {
-                        MainScreen(navController = navController)
+                        MainScreen(navController = navController, application)
                     }
                     composable("ProgressScreen") {
                         ProgressScreen(
                             endGameScreen = { navController.navigate("EndScreen") },
                             onClick = { navController.navigate("GameScreen") },
+                            application = application,
                         )
                     }
                     composable("GameScreen") {

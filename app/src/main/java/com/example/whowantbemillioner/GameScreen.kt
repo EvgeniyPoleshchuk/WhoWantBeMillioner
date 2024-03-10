@@ -96,7 +96,7 @@ fun GameScreen(
 
     if (timerCount.value == 0 || questionCount.intValue == 14) {
         EndGameScreen()
-        resulInfo = ResulInfo(questionCount.intValue + 1, cashList()[questionCount.intValue])
+        resulInfo = ResulInfo(resulInfo?.name ?: "Нет имени",questionCount.intValue, cashList()[questionCount.intValue])
     }
 
 

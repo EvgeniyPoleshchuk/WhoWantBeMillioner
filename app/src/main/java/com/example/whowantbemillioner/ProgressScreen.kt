@@ -1,5 +1,6 @@
 package com.example.whowantbemillioner
 
+import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.Image
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.whowantbemillioner.data.QuestionsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -34,8 +36,12 @@ fun ProgressScreen(
     endGameScreen: () -> Unit,
     onClick: () -> Unit,
     number: Int? = currentInfo?.number,
-    isChecked: Boolean? = currentInfo?.isChecked
+    isChecked: Boolean? = currentInfo?.isChecked,
+    application: Application,
 ) {
+    val scope = rememberCoroutineScope()
+    val questionsRepository = QuestionsRepository(application)
+
     val image = painterResource(id = R.drawable.millionaire)
     val questions = listOf(
         "$500", "$1,000", "$2,000", "$3,000", "$5,000",
@@ -47,8 +53,14 @@ fun ProgressScreen(
         val timerHandler = Handler(Looper.getMainLooper())
         val timerRunnable = Runnable {
             endGameScreen()
-            if (number != null) {
-                resulInfo = ResulInfo(number + 1, cashList()[number])
+            if (number != null && resulInfo != null) {
+                scope.launch {
+//                    val user = questionsRepository.getAllUsersFromCache()
+                    questionsRepository.insertUserIntoCache(
+                        ResulInfo(resulInfo!!.name, number, cashList()[number - 1])
+                    )
+                }
+                resulInfo = ResulInfo(resulInfo!!.name, number, cashList()[number - 1])
             }
         }
         timerHandler.postDelayed(timerRunnable, 1000)
