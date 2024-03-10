@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
                             endGameScreen = { navController.navigate("EndScreen") },
                             onClick = { navController.navigate("GameScreen") },
                             application = application,
+
                         )
                     }
                     composable("GameScreen") {

@@ -85,11 +85,15 @@ fun GameScreen(
     val alpha = remember { mutableFloatStateOf(buttonInfo.alfa) }
     val alpha2 = remember { mutableFloatStateOf(buttonInfo.alfa2) }
     val alpha3 = remember { mutableFloatStateOf(buttonInfo.alfa3) }
-    val mediaPlayer by remember { mutableStateOf(MediaPlayer.create(application, R.raw.timer))}
-    mediaPlayer.start()
-
+    var mediaPlayerTimer by remember { mutableStateOf(MediaPlayer.create(application, R.raw.timer))}
+    var mediaPlayerCurrency by remember { mutableStateOf(MediaPlayer.create(application, R.raw.currentanswer))}
+    var mediaPlayerWrong by remember { mutableStateOf(MediaPlayer.create(application, R.raw.wronganswer))}
+    mediaPlayerTimer.start()
     val snackbarHostState = remember { SnackbarHostState() }
     val resultFriend = remember { mutableStateOf("") }
+
+
+
 
     timerColor = when (timerCount.value) {
         in 11..20 -> Color(0xFFFFB340)
@@ -140,7 +144,10 @@ fun GameScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onClick() }) {
+                    IconButton(onClick = {
+                        onClick()
+                        mediaPlayerTimer.stop()
+                    }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Localized description",
@@ -216,6 +223,7 @@ fun GameScreen(
                             .fillMaxSize()
                             .size(65.dp)
                             .clickable(enabled = isButtonEnabled) {
+
                                 isButtonEnabled = false
                                 timerRepeat.value = false
                                 currentAnswer = "check"
@@ -226,18 +234,22 @@ fun GameScreen(
                                             .contains(shuffledAnswers[it])
                                     ) {
                                         currentAnswer = "true"
+                                        mediaPlayerCurrency.start()
                                         isChecked = true
                                     } else {
                                         currentAnswer = "false"
                                         isChecked = false
+                                        mediaPlayerWrong.start()
                                     }
 
                                     isButtonEnabled = true
                                     timerCount.value = 30
                                     timerRepeat.value = true
                                     Log.i("!!!", "$isChecked")
-                                    delay(1000)
+                                    delay(2000)
                                     currentAnswer = "t"
+                                    mediaPlayerTimer.stop()
+                                    mediaPlayerCurrency.stop()
                                     navController.navigate("ProgressScreen")
                                     questionCount.intValue++
                                     currentInfo = CurrentInfo(questionCount.intValue, isChecked)
@@ -413,8 +425,3 @@ fun callFriend(answers: List<String>): String {
         wrongAnswers.random()
     }
 }
-
-
-
-
-
