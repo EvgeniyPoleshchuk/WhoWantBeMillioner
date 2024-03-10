@@ -22,6 +22,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -50,6 +52,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 var resulInfo: ResulInfo? = null
 var currentInfo: CurrentInfo? = null
@@ -79,6 +82,9 @@ fun GameScreen(
     val alpha2 = remember { mutableFloatStateOf(buttonInfo.alfa2) }
     val alpha3 = remember { mutableFloatStateOf(buttonInfo.alfa3) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val resultFriend = remember { mutableStateOf("") }
+
 
 
 
@@ -89,7 +95,7 @@ fun GameScreen(
     }
     questionViewModel.loadQuestions(questionCount.intValue)
 
-    val shuffledAnswers by remember(viewState.answers) {
+    var shuffledAnswers by remember(viewState.answers) {
         mutableStateOf(viewState.answers.shuffled())
     }
 
@@ -101,6 +107,9 @@ fun GameScreen(
 
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -186,7 +195,7 @@ fun GameScreen(
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-                items(4) {
+                items(shuffledAnswers.size) {
                     var currentAnswer by remember { mutableStateOf("") }
 
                     val color = when (currentAnswer) {
@@ -275,17 +284,28 @@ fun GameScreen(
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-//                var alfa = buttonInfo.alfa
-//                var alfa2 =buttonInfo.alfa2
-//                var alfa3 =buttonInfo.alfa3
                 val buttonList =
-                    listOf(R.drawable.fifty_fifty, R.drawable.life, R.drawable.call)
+                    listOf(R.drawable.fifty_fifty, R.drawable.audience, R.drawable.call)
                 Image(
                     painter = painterResource(id = buttonList[0]),
                     contentDescription = null,
                     modifier = Modifier
                         .size(95.dp, 75.dp)
                         .clickable(enabled = buffonHelper.value) {
+                            val trueAnswers = shuffledAnswers.filter {
+                                STUB
+                                    .getTrueAnswer()
+                                    .contains(it)
+                            }
+                            val answers = shuffledAnswers.first {
+                                !STUB
+                                    .getTrueAnswer()
+                                    .contains(it)
+                            }
+                            val allAnswers = trueAnswers + answers
+
+                            shuffledAnswers = allAnswers
+
                             alpha.floatValue = 0.5f
                             buttonInfo = ButtonInfo(
                                 alfa = 0.5f,
@@ -303,6 +323,11 @@ fun GameScreen(
                     modifier = Modifier
                         .size(95.dp, 75.dp)
                         .clickable(enabled = buffonHelper2.value) {
+                            val result = helpOfHall(shuffledAnswers.shuffled())
+                            scope.launch {
+                                snackbarHostState.showSnackbar(result)
+                            }
+
                             alpha2.floatValue = 0.5f
                             buttonInfo = ButtonInfo(
                                 alfa = alpha.floatValue,
@@ -320,6 +345,16 @@ fun GameScreen(
                     modifier = Modifier
                         .size(95.dp, 75.dp)
                         .clickable(enabled = buffonHelper3.value) {
+                            val result = callFriend(shuffledAnswers.shuffled())
+
+                            shuffledAnswers = shuffledAnswers.mapIndexed { _, element ->
+                                if (element == result) {
+                                    "$element - Выбор Друга"
+                                } else {
+                                    element
+                                }
+                            }
+                            resultFriend.value = result
                             alpha3.floatValue = 0.5f
                             buttonInfo = ButtonInfo(
                                 alpha.floatValue,
@@ -352,6 +387,25 @@ fun countDownTimer(value: MutableState<Int>, isRunning: MutableState<Boolean>): 
     return seconds.value
 }
 
+fun helpOfHall(answers: List<String>): String {
+    val randomValue = Random.nextInt(100)
+    return if (randomValue < 70) {
+        answers.random()
+    } else {
+        val wrongAnswers = answers.toMutableList().apply { remove(answers.random()) }
+        wrongAnswers.random()
+    }
+}
+
+fun callFriend(answers: List<String>): String {
+    val randomValue = Random.nextInt(100)
+    return if (randomValue < 80) {
+        answers.random()
+    } else {
+        val wrongAnswers = answers.toMutableList().apply { remove(answers.random()) }
+        wrongAnswers.random()
+    }
+}
 
 
 
