@@ -106,7 +106,7 @@ fun EndScreen(
                         indication = null,
                         interactionSource = MutableInteractionSource()
                     ) {
-//                        navController.navigate("GameScreen")
+                        currentInfo = CurrentInfo(0,true)
                           navigateToGameScreen()
                     }
             )
@@ -142,7 +142,7 @@ fun EndScreen(
                         indication = null,
                         interactionSource = MutableInteractionSource()
                     ) {
-//                        navController.navigate("MainScreen")
+                        currentInfo = CurrentInfo(0,true)
                         navigateToMainScreen()
 
                     }

@@ -50,7 +50,7 @@ fun MainScreen(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Кто хочет стать Миллионером",
+            text = "Кто хочет стать Миллионером?",
             fontSize = 36.sp,
             lineHeight = 42.sp,
             fontWeight = FontWeight.Bold,
@@ -77,6 +77,7 @@ fun MainScreen(navController: NavController) {
                         indication = null,
                         interactionSource = MutableInteractionSource()
                     ) {
+                        currentInfo = CurrentInfo(0,true)
                         navController.navigate("GameScreen")
                     }
             )

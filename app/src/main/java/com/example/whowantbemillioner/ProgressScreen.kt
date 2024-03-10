@@ -1,6 +1,7 @@
 package com.example.whowantbemillioner
 
-import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -23,12 +25,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun ProgressScreen(
+    endGameScreen: () -> Unit,
     onClick: () -> Unit,
-    counter: Int?,
-    isChecked: Boolean?,
+    number: Int? = currentInfo?.number,
+    isChecked: Boolean? = currentInfo?.isChecked
 ) {
     val image = painterResource(id = R.drawable.millionaire)
     val questions = listOf(
@@ -37,8 +43,16 @@ fun ProgressScreen(
         "$50,000", "$100,000", "$250,000", "$500,000", "$1,000,000"
     )
 
-    Log.i("!!!", "$isChecked")
-    Log.i("!!!", "$counter")
+    if (isChecked == false) {
+        val timerHandler = Handler(Looper.getMainLooper())
+        val timerRunnable = Runnable {
+            endGameScreen()
+            if (number != null) {
+                resulInfo = ResulInfo(number + 1, cashList()[number])
+            }
+        }
+        timerHandler.postDelayed(timerRunnable, 1000)
+    }
 
     Box(
         modifier = Modifier
@@ -61,8 +75,8 @@ fun ProgressScreen(
                 val color =
                     if (it + 1 == 5 || it + 1 == 10) painterResource(id = R.drawable.rectangle_blue)
                     else if (it + 1 == 15) painterResource(id = R.drawable.rectangle_gold)
-                    else if (it + 1 == counter && isChecked == true) painterResource(id = R.drawable.answer_green)
-                    else if (it + 1 == counter && isChecked == false) painterResource(id = R.drawable.answer_red)
+                    else if (it + 1 == number && isChecked == true) painterResource(id = R.drawable.answer_green)
+                    else if (it + 1 == number && isChecked == false) painterResource(id = R.drawable.answer_red)
                     else painterResource(id = R.drawable.rectangle_dark_blue)
 
                 Box(
@@ -109,18 +123,33 @@ fun ProgressScreen(
 
     }
     Column(
-        modifier = Modifier.fillMaxSize().padding(vertical = 30.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 30.dp),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
-        Button(onClick = { onClick() }, modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp)
-        , colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-        ) {
-            Text("Продолжить")
+        if (isChecked != null) {
+            Button(enabled = isChecked,
+                onClick = {
+
+                    onClick()
+                    if (number != null) {
+                        currentInfo = CurrentInfo(number, isChecked)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 30.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+            ) {
+                Text("Продолжить")
+            }
         }
     }
 }
+
 fun cashList(): List<String> {
     return listOf(
         "$500", "$1,000", "$2,000", "$3,000", "$5,000",

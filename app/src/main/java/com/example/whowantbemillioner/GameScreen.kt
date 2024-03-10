@@ -1,7 +1,5 @@
 package com.example.whowantbemillioner
 
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -33,8 +29,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +52,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 var resulInfo: ResulInfo? = null
+var currentInfo: CurrentInfo? = null
+var buttonInfo: ButtonInfo = ButtonInfo()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,14 +65,28 @@ fun GameScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
-
+    val buffonHelper = remember { mutableStateOf(true) }
+    val buffonHelper2 = remember { mutableStateOf(true) }
+    val buffonHelper3 = remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     var isButtonEnabled by remember { mutableStateOf(true) }
-    val questionCount = remember { mutableIntStateOf(0) }
+    val questionCount = remember { mutableIntStateOf(currentInfo?.number ?: 0) }
     val timerRepeat = remember { mutableStateOf(true) }
     val timerCount = remember { mutableStateOf(30) }
-    val count = remember { mutableIntStateOf(0) }
+    var timerColor by remember { mutableStateOf(White) }
+    var isChecked by remember { mutableStateOf(true) }
+    val alpha = remember { mutableFloatStateOf(buttonInfo.alfa) }
+    val alpha2 = remember { mutableFloatStateOf(buttonInfo.alfa2) }
+    val alpha3 = remember { mutableFloatStateOf(buttonInfo.alfa3) }
 
+
+
+
+    timerColor = when (timerCount.value){
+        in 11..20 -> Color(0xFFFFB340)
+        in 0..10 -> Color(0xFFFF6231)
+        else -> White
+    }
     questionViewModel.loadQuestions(questionCount.intValue)
 
     val shuffledAnswers by remember(viewState.answers) {
@@ -81,11 +94,10 @@ fun GameScreen(
     }
 
 
-    if (timerCount.value == 0 || count.intValue == 14 ) {
+    if (timerCount.value == 0 || questionCount.intValue == 14) {
         EndGameScreen()
-        resulInfo = ResulInfo(count.intValue + 1, cashList()[count.intValue])
+        resulInfo = ResulInfo(questionCount.intValue + 1, cashList()[questionCount.intValue])
     }
-
 
 
     Scaffold(
@@ -98,14 +110,14 @@ fun GameScreen(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "QUESTION ${count.intValue + 1}",
-                            color = Color.White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
+                            text = "ВОПРОС ${questionCount.intValue + 1}",
+                            color = White.copy(alpha = 0.5F), // Устанавливаем альфа-канал только для этого текста
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = cashList()[count.intValue],
-                            color = Color.White, // Оставляем цвет остального текста без изменений
+                            text = cashList()[questionCount.intValue],
+                            color = White, // Оставляем цвет остального текста без изменений
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -116,7 +128,7 @@ fun GameScreen(
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Localized description",
-                            tint = Color.White
+                            tint = White
                         )
                     }
                 },
@@ -145,19 +157,19 @@ fun GameScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.stopwatch),
                     contentDescription = null,
-                    tint = Color(0xFFFFB340).copy(alpha = 1F)
+                    tint = timerColor.copy(alpha = 1F)
                 )
                 Text(
                     text = countDownTimer(timerCount, timerRepeat).toString(),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFFFB340).copy(alpha = 1F)
+                    color = timerColor.copy(alpha = 1F)
                 )
 
             }
             Text(
                 text = viewState.question,
-                color = Color.White,
+                color = White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -176,20 +188,13 @@ fun GameScreen(
             ) {
                 items(4) {
                     var currentAnswer by remember { mutableStateOf("") }
-                    var isChecked by remember { mutableStateOf(false) }
+
                     val color = when (currentAnswer) {
                         "true" -> painterResource(id = R.drawable.answer_green)
                         "false" -> painterResource(id = R.drawable.answer_red)
                         "check" -> painterResource(id = R.drawable.big_rectangle_gold)
                         else -> painterResource(id = R.drawable.answer_blue)
                     }
-                    val timerHandler = Handler(Looper.getMainLooper())
-//                    val timerRunnable = Runnable {
-//                        answer = "t"
-//                        navController.navigate(
-//                            "ProgressScreen" + "/${questionCount.intValue}" + "/{$isChecked}")
-////                        toProgressScreen()
-//                    }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -217,13 +222,10 @@ fun GameScreen(
                                     Log.i("!!!", "$isChecked")
                                     delay(1000)
                                     currentAnswer = "t"
-//                                    navController.navigate(
-//                                        "ProgressScreen/${questionCount.intValue}/{$isChecked}"
-//                                    )
-                                    count.intValue++
+                                    navController.navigate("ProgressScreen")
                                     questionCount.intValue++
+                                    currentInfo = CurrentInfo(questionCount.intValue, isChecked)
                                 }
-//                                timerHandler.postDelayed(timerRunnable, 6000)
                             }
 
                     ) {
@@ -259,7 +261,7 @@ fun GameScreen(
                                 text = shuffledAnswers[it],
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = White
                             )
 
                         }
@@ -267,27 +269,58 @@ fun GameScreen(
 
                 }
             }
-            LazyRow(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
+//                var alfa = buttonInfo.alfa
+//                var alfa2 =buttonInfo.alfa2
+//                var alfa3 =buttonInfo.alfa3
                 val buttonList =
-                    listOf(R.drawable.fifty_fifty, R.drawable.audience, R.drawable.call)
-                items(buttonList.size) {
+                    listOf(R.drawable.fifty_fifty, R.drawable.life, R.drawable.call)
                     Image(
-                        painter = painterResource(id = buttonList[it]),
+                        painter = painterResource(id = buttonList[0]),
                         contentDescription = null,
-                        modifier = Modifier.size(95.dp, 75.dp),
-                        contentScale = ContentScale.Crop
+                        modifier = Modifier.size(95.dp, 75.dp)
+                            .clickable(enabled = buffonHelper.value) {
+                                alpha.floatValue = 0.5f
+                                buttonInfo = ButtonInfo(alfa = 0.5f, alfa2 = alpha2.floatValue, alfa3 = alpha3.floatValue)
+                                buffonHelper.value = false
+                            },
+                        contentScale = ContentScale.Crop,
+                       alpha = alpha.floatValue
                     )
+                Image(
+                    painter = painterResource(id = buttonList[1]),
+                    contentDescription = null,
+                    modifier = Modifier.size(95.dp, 75.dp)
+                        .clickable(enabled = buffonHelper2.value) {
+                            alpha2.floatValue = 0.5f
+                            buttonInfo = ButtonInfo(alfa = alpha.floatValue, alfa2 = 0.5f, alfa3 = alpha3.floatValue)
+                            buffonHelper2.value = false
+                        },
+                    contentScale = ContentScale.Crop,
+                    alpha = alpha2.floatValue
+                )
+                Image(
+                    painter = painterResource(id = buttonList[2]),
+                    contentDescription = null,
+                    modifier = Modifier.size(95.dp, 75.dp)
+                        .clickable(enabled = buffonHelper3.value) {
+                            alpha3.floatValue = 0.5f
+                            buttonInfo = ButtonInfo(alpha.floatValue, alfa2 = alpha2.floatValue, alfa3 = 0.5f)
+                            buffonHelper3.value = false
+                        },
+                    contentScale = ContentScale.Crop,
+                    alpha = alpha3.floatValue
+                )
                 }
-
+                Log.i("!!!", "$buttonInfo")
             }
         }
     }
-}
 
 @Composable
 fun countDownTimer(value: MutableState<Int>, isRunning: MutableState<Boolean>): Int {
