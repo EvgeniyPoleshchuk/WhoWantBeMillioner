@@ -78,6 +78,7 @@ fun MainScreen(navController: NavController) {
                         interactionSource = MutableInteractionSource()
                     ) {
                         currentInfo = CurrentInfo(0,true)
+                        buttonInfo = ButtonInfo(1f, 1f, 1f)
                         navController.navigate("GameScreen")
                     }
             )

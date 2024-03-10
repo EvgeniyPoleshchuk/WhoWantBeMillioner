@@ -107,7 +107,8 @@ fun EndScreen(
                         interactionSource = MutableInteractionSource()
                     ) {
                         currentInfo = CurrentInfo(0,true)
-                          navigateToGameScreen()
+                        buttonInfo = ButtonInfo(1f, 1f, 1f)
+                        navigateToGameScreen()
                     }
             )
             Row(
@@ -143,8 +144,8 @@ fun EndScreen(
                         interactionSource = MutableInteractionSource()
                     ) {
                         currentInfo = CurrentInfo(0,true)
+                        buttonInfo = ButtonInfo(1f, 1f, 1f)
                         navigateToMainScreen()
-
                     }
             )
 
