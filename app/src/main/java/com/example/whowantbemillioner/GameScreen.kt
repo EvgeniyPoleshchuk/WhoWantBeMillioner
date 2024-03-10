@@ -1,5 +1,7 @@
 package com.example.whowantbemillioner
 
+import android.app.Application
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -64,12 +66,14 @@ fun GameScreen(
     onClick: () -> Unit,
     EndGameScreen: () -> Unit,
     navController: NavHostController,
+    application:Application
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
     val buffonHelper = remember { mutableStateOf(true) }
     val buffonHelper2 = remember { mutableStateOf(true) }
+    val hasExtraLife = remember { mutableStateOf(false) }
     val buffonHelper3 = remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     var isButtonEnabled by remember { mutableStateOf(true) }
@@ -81,6 +85,8 @@ fun GameScreen(
     val alpha = remember { mutableFloatStateOf(buttonInfo.alfa) }
     val alpha2 = remember { mutableFloatStateOf(buttonInfo.alfa2) }
     val alpha3 = remember { mutableFloatStateOf(buttonInfo.alfa3) }
+    var mediaPlayer by remember { mutableStateOf(MediaPlayer.create(application, R.raw.timer))}
+    mediaPlayer.start()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val resultFriend = remember { mutableStateOf("") }
@@ -88,7 +94,7 @@ fun GameScreen(
 
 
 
-    timerColor = when (timerCount.value){
+    timerColor = when (timerCount.value) {
         in 11..20 -> Color(0xFFFFB340)
         in 0..10 -> Color(0xFFFF6231)
         else -> White
@@ -102,7 +108,11 @@ fun GameScreen(
 
     if (timerCount.value == 0 || questionCount.intValue == 14) {
         EndGameScreen()
-        resulInfo = ResulInfo(resulInfo?.name ?: "Нет имени",questionCount.intValue, cashList()[questionCount.intValue])
+        resulInfo = ResulInfo(
+            resulInfo?.name ?: "Нет имени",
+            questionCount.intValue,
+            cashList()[questionCount.intValue]
+        )
     }
 
 

@@ -1,6 +1,8 @@
 package com.example.whowantbemillioner
 
 
+import android.app.Application
+import android.media.MediaPlayer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +20,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -35,8 +41,11 @@ fun EndScreen(
     navigateToMainScreen: () -> Unit,
     navigateToGameScreen: () -> Unit,
     level: Int? = resulInfo?.coin,
-    coin: String? = resulInfo?.cash
+    coin: String? = resulInfo?.cash,
+            application: Application
 ) {
+    var mediaPlayer by remember { mutableStateOf(MediaPlayer.create(application, R.raw.goodbye)) }
+    mediaPlayer.start()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -108,6 +117,7 @@ fun EndScreen(
                     ) {
                         currentInfo = CurrentInfo(0,true)
                         buttonInfo = ButtonInfo(1f, 1f, 1f)
+                        mediaPlayer.stop()
                         navigateToGameScreen()
                     }
             )
@@ -145,6 +155,7 @@ fun EndScreen(
                     ) {
                         currentInfo = CurrentInfo(0,true)
                         buttonInfo = ButtonInfo(1f, 1f, 1f)
+                        mediaPlayer.stop()
                         navigateToMainScreen()
                     }
             )
@@ -166,10 +177,4 @@ fun EndScreen(
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun EndScreenPreview() {
-    EndScreen({}, {})
 }
