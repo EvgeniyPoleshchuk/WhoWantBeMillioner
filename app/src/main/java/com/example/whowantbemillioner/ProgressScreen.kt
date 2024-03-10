@@ -1,8 +1,6 @@
 package com.example.whowantbemillioner
 
 import android.app.Application
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +17,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -29,7 +26,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.whowantbemillioner.data.QuestionsRepository
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -40,7 +36,6 @@ fun ProgressScreen(
     isChecked: Boolean? = currentInfo?.isChecked,
     application: Application,
 ) {
-    val scope = rememberCoroutineScope()
     val questionsRepository = QuestionsRepository(application)
 
     val image = painterResource(id = R.drawable.millionaire)
@@ -51,19 +46,21 @@ fun ProgressScreen(
     )
 
     if (isChecked == false) {
-        val timerHandler = Handler(Looper.getMainLooper())
-
-        val timerRunnable = Runnable {
+        LaunchedEffect(Unit) {
+            delay(1000)
             if (number != null && resulInfo != null) {
-                scope.launch {
-                    questionsRepository.insertUserIntoCache(
-                        ResulInfo(resulInfo!!.name, number, cashList()[number - 1])
-                    )
+                val wins = when {
+                    number <= 4 -> "$5,000"
+                    number in 5..9 -> "$25,000"
+                    number == 14 -> "$1,000,000"
+                    else -> cashList()[number - 1]
                 }
-                resulInfo = ResulInfo(resulInfo!!.name, number, cashList()[number - 1])
+                questionsRepository.insertUserIntoCache(
+                    ResulInfo(resulInfo!!.name, number, wins)
+                )
+                resulInfo = ResulInfo(resulInfo!!.name, number, wins)
             }
         }
-        timerHandler.postDelayed(timerRunnable, 1000)
 
         LaunchedEffect(Unit) {
             delay(3000)
