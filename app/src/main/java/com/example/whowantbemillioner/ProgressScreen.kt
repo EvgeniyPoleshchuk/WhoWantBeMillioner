@@ -51,7 +51,7 @@ fun ProgressScreen(
                 resulInfo = ResulInfo(number + 1, cashList()[number])
             }
         }
-        timerHandler.postDelayed(timerRunnable, 3000)
+        timerHandler.postDelayed(timerRunnable, 1000)
     }
 
     Box(
@@ -130,19 +130,22 @@ fun ProgressScreen(
         horizontalAlignment = Alignment.CenterHorizontally
 
     ) {
-        Button(
-            onClick = {
-                onClick()
-                if (number != null && isChecked != null) {
-                    currentInfo = CurrentInfo(number, isChecked)
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-        ) {
-            Text("Продолжить")
+        if (isChecked != null) {
+            Button(enabled = isChecked,
+                onClick = {
+
+                    onClick()
+                    if (number != null) {
+                        currentInfo = CurrentInfo(number, isChecked)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 30.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+            ) {
+                Text("Продолжить")
+            }
         }
     }
 }

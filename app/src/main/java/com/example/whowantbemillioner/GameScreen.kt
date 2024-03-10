@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
@@ -53,6 +55,7 @@ import kotlinx.coroutines.launch
 
 var resulInfo: ResulInfo? = null
 var currentInfo: CurrentInfo? = null
+var buttonInfo: ButtonInfo? = null
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +67,9 @@ fun GameScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
-
+    var buffonHelper = remember { mutableStateOf(true) }
+    var buffonHelper2 = remember { mutableStateOf(true) }
+    var buffonHelper3 = remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     var isButtonEnabled by remember { mutableStateOf(true) }
     val questionCount = remember { mutableIntStateOf(currentInfo?.number ?: 0) }
@@ -72,6 +77,8 @@ fun GameScreen(
     val timerCount = remember { mutableStateOf(30) }
     var timerColor by remember { mutableStateOf(White) }
     var isChecked by remember { mutableStateOf(true) }
+
+
 
     timerColor = when (timerCount.value){
         in 11..20 -> Color(0xFFFFB340)
@@ -260,27 +267,56 @@ fun GameScreen(
 
                 }
             }
-            LazyRow(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
+
+                var alfa = buttonInfo?.alfa?:1f
+                var alfa2 =buttonInfo?.alfa2?:1f
+                var alfa3 =buttonInfo?.alfa3?:1f
                 val buttonList =
-                    listOf(R.drawable.fifty_fifty, R.drawable.audience, R.drawable.call)
-                items(buttonList.size) {
+                    listOf(R.drawable.fifty_fifty, R.drawable.life, R.drawable.call)
                     Image(
-                        painter = painterResource(id = buttonList[it]),
+                        painter = painterResource(id = buttonList[0]),
                         contentDescription = null,
-                        modifier = Modifier.size(95.dp, 75.dp),
-                        contentScale = ContentScale.Crop
+                        modifier = Modifier.size(95.dp, 75.dp)
+                            .clickable(enabled = buffonHelper.value) {
+                                buttonInfo?.alfa = 0.5f
+                                buffonHelper.value = false
+                            },
+                        contentScale = ContentScale.Crop,
+                       alpha = alfa
                     )
+                Image(
+                    painter = painterResource(id = buttonList[1]),
+                    contentDescription = null,
+                    modifier = Modifier.size(95.dp, 75.dp)
+                        .clickable(enabled = buffonHelper2.value) {
+                            buttonInfo?.alfa2 = 0.5f
+                            buffonHelper2.value = false
+                        },
+                    contentScale = ContentScale.Crop,
+                    alpha = alfa2
+                )
+                Image(
+                    painter = painterResource(id = buttonList[2]),
+                    contentDescription = null,
+                    modifier = Modifier.size(95.dp, 75.dp)
+                        .clickable(enabled = buffonHelper3.value) {
+                            buttonInfo?.alfa3 = 0.5f
+                            buffonHelper3.value = false
+                        },
+                    contentScale = ContentScale.Crop,
+                    alpha = alfa3
+                )
                 }
 
             }
         }
     }
-}
 
 @Composable
 fun countDownTimer(value: MutableState<Int>, isRunning: MutableState<Boolean>): Int {
