@@ -18,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,11 +52,10 @@ fun ProgressScreen(
 
     if (isChecked == false) {
         val timerHandler = Handler(Looper.getMainLooper())
+
         val timerRunnable = Runnable {
-            endGameScreen()
             if (number != null && resulInfo != null) {
                 scope.launch {
-//                    val user = questionsRepository.getAllUsersFromCache()
                     questionsRepository.insertUserIntoCache(
                         ResulInfo(resulInfo!!.name, number, cashList()[number - 1])
                     )
@@ -64,6 +64,11 @@ fun ProgressScreen(
             }
         }
         timerHandler.postDelayed(timerRunnable, 1000)
+
+        LaunchedEffect(Unit) {
+            delay(3000)
+            endGameScreen()
+        }
     }
 
     Box(

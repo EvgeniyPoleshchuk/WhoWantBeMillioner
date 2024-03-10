@@ -4,7 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.whowantbemillioner.ResulInfo
 
-@Database(entities = [ResulInfo::class], version = 2)
+@Database(entities = [ResulInfo::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
