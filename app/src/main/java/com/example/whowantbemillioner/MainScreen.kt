@@ -22,7 +22,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -44,7 +46,18 @@ import kotlinx.coroutines.launch
 fun MainScreen(navController: NavController, application: Application) {
     val scope = rememberCoroutineScope()
     var playerName by rememberSaveable { mutableStateOf("") }
+    var isValid by rememberSaveable { mutableStateOf(false) }
+    val alpha = remember { mutableFloatStateOf(1f) }
+
     val questionsRepository = QuestionsRepository(application)
+
+    if (playerName != "") {
+        isValid = true
+        alpha.floatValue = 1f
+    } else {
+        isValid = false
+        alpha.floatValue = 0.5f
+    }
 
     Column(
         modifier = Modifier
@@ -104,9 +117,11 @@ fun MainScreen(navController: NavController, application: Application) {
             Image(
                 painter = painterResource(id = R.drawable.big_rectangle_gold),
                 contentDescription = null,
+                alpha = alpha.floatValue,
                 modifier = Modifier
                     .fillMaxSize()
                     .clickable(
+                        enabled = isValid,
                         indication = null,
                         interactionSource = MutableInteractionSource()
                     ) {
@@ -174,6 +189,44 @@ fun MainScreen(navController: NavController, application: Application) {
 
                 Text(
                     text = "Правила игры",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Box(
+            //Rule
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(80.dp)
+                .padding(horizontal = 20.dp)
+
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.big_rectangle_dark_blue),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = MutableInteractionSource()
+                    ) {
+                        navController.navigate("StatisticScreen")
+                    }
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                Text(
+                    text = "Статистика",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White

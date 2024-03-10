@@ -3,11 +3,9 @@ package com.example.whowantbemillioner
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.whowantbemillioner.ui.theme.WhoWantBeMillionerTheme
 
 class MainActivity : ComponentActivity() {
@@ -49,6 +47,9 @@ class MainActivity : ComponentActivity() {
                             navigateToGameScreen = { navController.navigate("GameScreen") },
 
                             )
+                    }
+                    composable("StatisticScreen") {
+                        StatisticScreen(navController = navController, application)
                     }
                 }
             }
