@@ -1,5 +1,7 @@
 package com.example.whowantbemillioner
 
+import android.app.Application
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -61,12 +63,14 @@ fun GameScreen(
     onClick: () -> Unit,
     EndGameScreen: () -> Unit,
     navController: NavHostController,
+    application:Application
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val questionViewModel: MainViewModel = viewModel()
     val viewState by questionViewModel.questionsState
     val buffonHelper = remember { mutableStateOf(true) }
     val buffonHelper2 = remember { mutableStateOf(true) }
+    val hasExtraLife = remember { mutableStateOf(false) }
     val buffonHelper3 = remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     var isButtonEnabled by remember { mutableStateOf(true) }
@@ -78,11 +82,12 @@ fun GameScreen(
     val alpha = remember { mutableFloatStateOf(buttonInfo.alfa) }
     val alpha2 = remember { mutableFloatStateOf(buttonInfo.alfa2) }
     val alpha3 = remember { mutableFloatStateOf(buttonInfo.alfa3) }
+    var mediaPlayer by remember { mutableStateOf(MediaPlayer.create(application, R.raw.timer))}
+    mediaPlayer.start()
 
 
 
-
-    timerColor = when (timerCount.value){
+    timerColor = when (timerCount.value) {
         in 11..20 -> Color(0xFFFFB340)
         in 0..10 -> Color(0xFFFF6231)
         else -> White
@@ -96,7 +101,11 @@ fun GameScreen(
 
     if (timerCount.value == 0 || questionCount.intValue == 14) {
         EndGameScreen()
-        resulInfo = ResulInfo(resulInfo?.name ?: "Нет имени",questionCount.intValue, cashList()[questionCount.intValue])
+        resulInfo = ResulInfo(
+            resulInfo?.name ?: "Нет имени",
+            questionCount.intValue,
+            cashList()[questionCount.intValue]
+        )
     }
 
 
@@ -211,130 +220,143 @@ fun GameScreen(
                                     ) {
                                         currentAnswer = "true"
                                         isChecked = true
+                                    } else if (hasExtraLife.value) {
+                                        isButtonEnabled = true
+                                        if (STUB
+                                                .getTrueAnswer()
+                                                .contains(shuffledAnswers[it])
+                                        ) {
+                                            currentAnswer = "true"
+                                            isChecked = true
+                                        } else {
+                                            currentAnswer = "false"
+                                            isChecked = false
+                                        }
                                     } else {
                                         currentAnswer = "false"
                                         isChecked = false
                                     }
 
-                                    isButtonEnabled = true
-                                    timerCount.value = 30
-                                    timerRepeat.value = true
-                                    Log.i("!!!", "$isChecked")
-                                    delay(1000)
-                                    currentAnswer = "t"
-                                    navController.navigate("ProgressScreen")
-                                    questionCount.intValue++
-                                    currentInfo = CurrentInfo(questionCount.intValue, isChecked)
-                                }
+                                isButtonEnabled = true
+                                timerCount.value = 30
+                                timerRepeat.value = true
+                                Log.i("!!!", "$isChecked")
+                                delay(1000)
+                                currentAnswer = "t"
+                                navController.navigate("ProgressScreen")
+                                questionCount.intValue++
+                                currentInfo = CurrentInfo(questionCount.intValue, isChecked)
                             }
+                }
 
-                    ) {
-                        Image(
-                            painter = color,
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.FillBounds
-                        )
-                        Row(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 30.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                ) {
+                Image(
+                    painter = color,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 30.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 
-                            Text(
-                                text = "${
-                                    when (it) {
-                                        0 -> "A"
-                                        1 -> "B"
-                                        2 -> "C"
-                                        else -> "D"
-                                    }
-                                }:  ",
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFFB340)
-                            )
+                    Text(
+                        text = "${
+                            when (it) {
+                                0 -> "A"
+                                1 -> "B"
+                                2 -> "C"
+                                else -> "D"
+                            }
+                        }:  ",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFFB340)
+                    )
 
 
-                            Text(
-                                text = shuffledAnswers[it],
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = White
-                            )
-
-                        }
-                    }
+                    Text(
+                        text = shuffledAnswers[it],
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = White
+                    )
 
                 }
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
+
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
 //                var alfa = buttonInfo.alfa
 //                var alfa2 =buttonInfo.alfa2
 //                var alfa3 =buttonInfo.alfa3
-                val buttonList =
-                    listOf(R.drawable.fifty_fifty, R.drawable.life, R.drawable.call)
-                Image(
-                    painter = painterResource(id = buttonList[0]),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(95.dp, 75.dp)
-                        .clickable(enabled = buffonHelper.value) {
-                            alpha.floatValue = 0.5f
-                            buttonInfo = ButtonInfo(
-                                alfa = 0.5f,
-                                alfa2 = alpha2.floatValue,
-                                alfa3 = alpha3.floatValue
-                            )
-                            buffonHelper.value = false
-                        },
-                    contentScale = ContentScale.Crop,
-                    alpha = alpha.floatValue
-                )
-                Image(
-                    painter = painterResource(id = buttonList[1]),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(95.dp, 75.dp)
-                        .clickable(enabled = buffonHelper2.value) {
-                            alpha2.floatValue = 0.5f
-                            buttonInfo = ButtonInfo(
-                                alfa = alpha.floatValue,
-                                alfa2 = 0.5f,
-                                alfa3 = alpha3.floatValue
-                            )
-                            buffonHelper2.value = false
-                        },
-                    contentScale = ContentScale.Crop,
-                    alpha = alpha2.floatValue
-                )
-                Image(
-                    painter = painterResource(id = buttonList[2]),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(95.dp, 75.dp)
-                        .clickable(enabled = buffonHelper3.value) {
-                            alpha3.floatValue = 0.5f
-                            buttonInfo = ButtonInfo(
-                                alpha.floatValue,
-                                alfa2 = alpha2.floatValue,
-                                alfa3 = 0.5f
-                            )
-                            buffonHelper3.value = false
-                        },
-                    contentScale = ContentScale.Crop,
-                    alpha = alpha3.floatValue
-                )
-            }
-            Log.i("!!!", "$buttonInfo")
+            val buttonList =
+                listOf(R.drawable.fifty_fifty, R.drawable.life, R.drawable.call)
+            Image(
+                painter = painterResource(id = buttonList[0]),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(95.dp, 75.dp)
+                    .clickable(enabled = buffonHelper.value) {
+                        alpha.floatValue = 0.5f
+                        buttonInfo = ButtonInfo(
+                            alfa = 0.5f,
+                            alfa2 = alpha2.floatValue,
+                            alfa3 = alpha3.floatValue
+                        )
+                        buffonHelper.value = false
+                    },
+                contentScale = ContentScale.Crop,
+                alpha = alpha.floatValue
+            )
+            Image(
+                painter = painterResource(id = buttonList[1]),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(95.dp, 75.dp)
+                    .clickable(enabled = buffonHelper2.value) {
+                        alpha2.floatValue = 0.5f
+                        buttonInfo = ButtonInfo(
+                            alfa = alpha.floatValue,
+                            alfa2 = 0.5f,
+                            alfa3 = alpha3.floatValue
+                        )
+                        buffonHelper2.value = false
+                        hasExtraLife.value = true
+                    },
+                contentScale = ContentScale.Crop,
+                alpha = alpha2.floatValue
+            )
+            Image(
+                painter = painterResource(id = buttonList[2]),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(95.dp, 75.dp)
+                    .clickable(enabled = buffonHelper3.value) {
+                        alpha3.floatValue = 0.5f
+                        buttonInfo = ButtonInfo(
+                            alpha.floatValue,
+                            alfa2 = alpha2.floatValue,
+                            alfa3 = 0.5f
+                        )
+                        buffonHelper3.value = false
+                    },
+                contentScale = ContentScale.Crop,
+                alpha = alpha3.floatValue
+            )
         }
+        Log.i("!!!", "$buttonInfo")
     }
+}
 }
 
 @Composable

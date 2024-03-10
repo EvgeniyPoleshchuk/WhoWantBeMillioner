@@ -33,7 +33,8 @@ class MainActivity : ComponentActivity() {
                         GameScreen(
                             onClick = { navController.navigate("MainScreen") },
                             EndGameScreen = { navController.navigate("EndScreen") },
-                            navController = navController
+                            navController = navController,
+                            application = application
                         )
                     }
                     composable("RulesScreen") {
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
                         EndScreen(
                             navigateToMainScreen = { navController.navigate("MainScreen") },
                             navigateToGameScreen = { navController.navigate("GameScreen") },
-
+                            application = application
                             )
                     }
                     composable("StatisticScreen") {

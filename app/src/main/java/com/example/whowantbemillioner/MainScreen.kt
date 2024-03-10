@@ -1,6 +1,7 @@
 package com.example.whowantbemillioner
 
 import android.app.Application
+import android.media.MediaPlayer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,7 +51,8 @@ fun MainScreen(navController: NavController, application: Application) {
     val alpha = remember { mutableFloatStateOf(1f) }
 
     val questionsRepository = QuestionsRepository(application)
-
+    var mediaPlayer by remember { mutableStateOf(MediaPlayer.create(application, R.raw.hello)) }
+    mediaPlayer.start()
     if (playerName != "") {
         isValid = true
         alpha.floatValue = 1f
@@ -141,6 +143,7 @@ fun MainScreen(navController: NavController, application: Application) {
                             }
                         }
                         navController.navigate("GameScreen")
+                        mediaPlayer.stop()
                     }
             )
             Row(

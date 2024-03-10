@@ -52,7 +52,6 @@ fun ProgressScreen(
     if (isChecked == false) {
         val timerHandler = Handler(Looper.getMainLooper())
         val timerRunnable = Runnable {
-            endGameScreen()
             if (number != null && resulInfo != null) {
                 scope.launch {
 //                    val user = questionsRepository.getAllUsersFromCache()
@@ -63,7 +62,8 @@ fun ProgressScreen(
                 resulInfo = ResulInfo(resulInfo!!.name, number, cashList()[number - 1])
             }
         }
-        timerHandler.postDelayed(timerRunnable, 1000)
+        timerHandler.postDelayed(timerRunnable, 2000)
+        endGameScreen()
     }
 
     Box(
